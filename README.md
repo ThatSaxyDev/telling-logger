@@ -249,23 +249,6 @@ CriticalAlert().nowTelling(
 - `metadata` – Additional context data
 - `trackOnce` – Track only first appearance (defaults to `true`)
 
-### Built-in Rate Limiting
-
-Telling includes intelligent rate limiting to prevent log flooding and protect your backend:
-
-**Automatically configured with optimal values:**
-- **Deduplication Window**: 5 seconds – Identical logs (same message, level, stackTrace) are merged
-- **Crash Throttle**: 5 seconds – Only one crash with the same stackTrace per window
-- **General Throttle**: 1 second – Prevents rapid-fire duplicate logs
-- **Rate Limit**: 10 logs/second maximum
-
-**How it protects you:**
-- **Deduplication**: Prevents accidental log spam from loops or rapid state changes
-- **Crash Throttling**: Stops crash storms from overwhelming your backend
-- **Rate Limiting**: Ensures your app doesn't exceed reasonable logging volume
-- **Smart Throttling**: Different limits for crashes vs general logs
-
-No configuration needed – works out of the box! 🎯
 
 ### Session Management
 
@@ -341,95 +324,6 @@ void main() async {
   runApp(MyApp());
 }
 ```
-
-## 🌐 Backend Integration
-
-### Using the Official Backend
-
-Deploy the [open-source Telling backend](https://github.com/ThatSaxyDev/telling) with one click:
-
-```bash
-# Clone the backend
-git clone https://github.com/ThatSaxyDev/telling.git
-cd telling
-
-# Deploy (supports Dart Frog, Globe.dev, etc.)
-dart pub get
-dart run bin/server.dart
-```
-
-### Custom Backend
-
-Build your own backend that accepts logs via `POST /api/v1/logs`:
-
-**Request Headers:**
-```
-Content-Type: application/json
-x-api-key: YOUR_API_KEY
-```
-
-**Request Body:**
-```json
-[
-  {
-    "id": "1700745600000",
-    "type": "analytics",
-    "level": "info",
-    "message": "User logged in",
-    "timestamp": "2024-11-23T10:30:00.000Z",
-    "stackTrace": null,
-    "metadata": {
-      "screen": "Login",
-      "method": "email"
-    },
-    "device": {
-      "platform": "iOS",
-      "osVersion": "17.0",
-      "deviceModel": "iPhone 15 Pro",
-      "appVersion": "1.2.0",
-      "appBuildNumber": "42"
-    },
-    "userId": "user_123",
-    "userName": "Jane Doe",
-    "userEmail": "jane@example.com",
-    "sessionId": "user_123_1700745600000"
-  }
-]
-```
-
-**Response:**
-- `200 OK` – Logs accepted
-- `403 Forbidden` – Invalid API key
-- `4xx/5xx` – Retry with exponential backoff
-
-## 📱 Platform Support
-
-| Platform | Status | Notes |
-|----------|--------|-------|
-| iOS | ✅ Fully Supported | iOS 11+ |
-| Android | ✅ Fully Supported | Android 5.0+ (API 21+) |
-| Web | ✅ Fully Supported | All modern browsers |
-| macOS | ✅ Fully Supported | macOS 10.14+ |
-| Windows | ✅ Fully Supported | Windows 10+ |
-| Linux | ✅ Fully Supported | Most distributions |
-
-## ⚡ Performance
-
-### Production Optimizations
-
-- **Zero Debug Overhead**: Debug logs are tree-shaken from release builds
-- **Asynchronous**: All network operations run in background
-- **Batched Sending**: Logs are batched every 5 seconds
-- **Smart Deduplication**: Prevents duplicate logs from consuming bandwidth
-- **Memory Efficient**: Bounded buffer with automatic cleanup
-- **Offline Resilient**: Persists unsent logs to disk
-
-### Benchmarks
-
-- **Initialization**: ~50ms (includes device metadata collection)
-- **Log call overhead**: <1ms (async, non-blocking)
-- **Memory footprint**: ~2MB (including buffer)
-- **Battery impact**: Negligible (<0.1% on mobile)
 
 ## 🎓 Best Practices
 
@@ -519,70 +413,6 @@ Telling.instance.event('login', properties: {
 });
 ```
 
-## 🧪 Testing
-
-### Unit Testing
-
-Mock Telling in your tests:
-
-```dart
-// test/mocks.dart
-import 'package:mocktail/mocktail.dart';
-import 'package:telling_logger/telling_logger.dart';
-
-class MockTelling extends Mock implements Telling {}
-
-// test/my_test.dart
-void main() {
-  late MockTelling mockTelling;
-  
-  setUp(() {
-    mockTelling = MockTelling();
-  });
-  
-  test('logs event on button press', () async {
-    when(() => mockTelling.event(any(), properties: any(named: 'properties')))
-        .thenAnswer((_) async {});
-    
-    // Test your code
-    
-    verify(() => mockTelling.event('button_clicked', properties: any(named: 'properties')));
-  });
-}
-```
-
-### Integration Testing
-
-```dart
-void main() {
-  testWidgets('tracks screen view', (tester) async {
-    await Telling.instance.init('TEST_API_KEY');
-    
-    await tester.pumpWidget(MyApp());
-    await tester.pumpAndSettle();
-    
-    // Verify screen tracking occurred
-    // (check your test backend)
-  });
-}
-```
-
-## 🔍 Troubleshooting
-
-### Logs Not Appearing
-
-1. **Check API Key**: Ensure your API key is valid
-2. **Check Network**: Verify backend URL is reachable
-3. **Check Initialization**: Confirm `Telling.instance.init()` was called
-4. **Check Rate Limiting**: You may be hitting rate limits
-
-```dart
-// Enable debug mode to see what's happening
-if (kDebugMode) {
-  // Telling automatically prints debug info in debug mode
-  // Check console for messages starting with "Telling:"
-}
-```
 
 ### Common Errors
 
@@ -594,21 +424,8 @@ if (kDebugMode) {
 - Check backend is running and accessible
 
 **"Logs being dropped"**
-- Check rate limiting configuration
 - Reduce log volume or increase limits
 
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md).
-
-### Development Setup
-
-```bash
-git clone https://github.com/ThatSaxyDev/telling-logger.git
-cd telling-logger
-flutter pub get
-flutter test
-```
 
 ## 📄 License
 
@@ -619,7 +436,7 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 - � [Documentation](https://github.com/ThatSaxyDev/telling-logger/wiki)
 - 🐛 [Report Issues](https://github.com/ThatSaxyDev/telling-logger/issues)
 - � [Discussions](https://github.com/ThatSaxyDev/telling-logger/discussions)
-- 📧 Email: support@telling.dev
+- 📧 Email: kiishidart@gmail.com
 
 ## 🌟 Show Your Support
 
@@ -631,6 +448,6 @@ If Telling Logger helped you build better apps, please:
 
 ---
 
-**Made with ❤️ by the Telling team**
+**Made with 💙 by Kiishi**
 
-[Website](https://telling.dev) • [Twitter](https://twitter.com/ThatSaxyDev) • [GitHub](https://github.com/ThatSaxyDev)
+[Website](https://telling.dev) • [Twitter](https://twitter.com/kiishigod) • [GitHub](https://github.com/ThatSaxyDev)

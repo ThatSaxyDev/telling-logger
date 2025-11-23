@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.2 - 2024-11-23
+
+### Improved
+- **Streamlined Documentation**: Simplified README for better clarity
+  - Removed verbose sections to focus on core features
+  - Cleaner, more concise documentation
+- **Updated Contact Information**: Updated support email and author details
+
 ## 1.0.1 - 2024-11-23
 
 ### Changed
