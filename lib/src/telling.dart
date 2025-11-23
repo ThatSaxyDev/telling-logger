@@ -17,7 +17,7 @@ class Telling {
   static Telling get instance => _instance;
 
   String? _apiKey;
-  String _baseUrl =
+  final String _baseUrl =
       'https://tellingserver-qsbx0dw-thatsaxydev.globeapp.dev/api/v1/logs';
   bool _initialized = false;
   DeviceMetadata? _deviceMetadata;
@@ -55,33 +55,15 @@ class Telling {
   /// Initialize the Telling SDK
   Future<void> init(
     String apiKey, {
-    String? baseUrl,
     String? userId,
     String? userName,
     String? userEmail,
-    // Rate limiting configuration
-    Duration? deduplicationWindow,
-    Duration? crashThrottleWindow,
-    int? maxLogsPerSecond,
   }) async {
     _apiKey = apiKey;
-    if (baseUrl != null) {
-      _baseUrl = baseUrl;
-    }
     _userId = userId;
     _userName = userName;
     _userEmail = userEmail;
     
-    // Configure rate limiter
-    if (deduplicationWindow != null) {
-      _rateLimiter.deduplicationWindow = deduplicationWindow;
-    }
-    if (crashThrottleWindow != null) {
-      _rateLimiter.crashThrottleWindow = crashThrottleWindow;
-    }
-    if (maxLogsPerSecond != null) {
-      _rateLimiter.maxLogsPerSecond = maxLogsPerSecond;
-    }
     _initialized = true;
     
     // Collect device metadata

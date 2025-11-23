@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.1 - 2024-11-23
+
+### Changed
+- **Production-Safe Logging**: All debug `print` statements now wrapped with `kDebugMode` checks
+  - Debug logs are automatically stripped from release builds (tree-shaken)
+  - Zero performance overhead in production
+- **Simplified API**: Removed configurable rate limiting and baseUrl parameters
+  - Rate limiting now uses optimal fixed values (5s deduplication, 5s crash throttle, 10 logs/sec)
+  - Backend URL is now fixed internally
+  - Cleaner, simpler initialization - just provide your API key
+
+### Improved
+- **Documentation**: Comprehensive README with 600+ lines covering all features
+  - Added widget tracking extension documentation
+  - Included best practices and troubleshooting sections
+  - Added performance benchmarks and optimization details
+
 ## 1.0.0 - 2024-11-23
 
 ### Initial Release
