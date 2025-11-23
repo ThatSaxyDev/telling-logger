@@ -98,19 +98,27 @@ class Telling {
     // Setup app lifecycle listeners
     _setupAppLifecycleListeners();
     
-    print('Telling SDK Initialized');
+    if (kDebugMode) {
+      print('Telling SDK Initialized');
+    }
   }
 
   /// Enable automatic crash reporting
   void enableCrashReporting() {
     if (!_initialized) {
-      print('Telling SDK not initialized. Call Telling.instance.init() first.');
+      if (kDebugMode) {
+        print(
+          'Telling SDK not initialized. Call Telling.instance.init() first.',
+        );
+      }
       return;
     }
     
     // Catch Flutter framework errors
     FlutterError.onError = (details) {
-      print('Telling: CAUGHT FLUTTER ERROR: ${details.exception}');
+      if (kDebugMode) {
+        print('Telling: CAUGHT FLUTTER ERROR: ${details.exception}');
+      }
       
       // Determine severity based on error type
       final errorString = details.exception.toString().toLowerCase();
@@ -150,7 +158,9 @@ class Telling {
     
     // Catch async errors
     PlatformDispatcher.instance.onError = (error, stack) {
-      print('Telling: CAUGHT PLATFORM ERROR: $error');
+      if (kDebugMode) {
+        print('Telling: CAUGHT PLATFORM ERROR: $error');
+      }
 
       // Platform errors are usually fatal
       log(
@@ -163,7 +173,9 @@ class Telling {
       return true;
     };
     
-    print('Telling: Crash reporting enabled');
+    if (kDebugMode) {
+      print('Telling: Crash reporting enabled');
+    }
   }
 
   /// Track an analytics event
@@ -179,7 +191,11 @@ class Telling {
   /// Set user context (call after user logs in)
   void setUser({required String userId, String? userName, String? userEmail}) {
     if (!_initialized) {
-      print('Telling SDK not initialized. Call Telling.instance.init() first.');
+      if (kDebugMode) {
+        print(
+          'Telling SDK not initialized. Call Telling.instance.init() first.',
+        );
+      }
       return;
     }
 
@@ -211,7 +227,11 @@ class Telling {
   /// Clear user context (call after user logs out)
   void clearUser() {
     if (!_initialized) {
-      print('Telling SDK not initialized. Call Telling.instance.init() first.');
+      if (kDebugMode) {
+        print(
+          'Telling SDK not initialized. Call Telling.instance.init() first.',
+        );
+      }
       return;
     }
 
@@ -297,7 +317,11 @@ class Telling {
     LogType type = LogType.general,
   }) {
     if (!_initialized) {
-      print('Telling SDK not initialized. Call Telling.instance.init() first.');
+      if (kDebugMode) {
+        print(
+          'Telling SDK not initialized. Call Telling.instance.init() first.',
+        );
+      }
       return;
     }
 
@@ -370,9 +394,11 @@ class Telling {
     _buffer.clear();
 
     if (kDebugMode && eventsToSend.length < _buffer.length) {
-      print(
+      if (kDebugMode) {
+        print(
         'Telling: Deduplicated buffer: ${_buffer.length} → ${eventsToSend.length} unique logs',
       );
+      }
     }
 
     try {
@@ -403,23 +429,27 @@ class Telling {
           _buffer.clear(); // Don't retry
           _persistLogs();
 
-          print('━' * 60);
-          print('🚨 Telling SDK: INVALID API KEY');
-          print('━' * 60);
-          print('Your API key is not recognized by the backend.');
-          print('');
-          print('To fix this:');
-          print('1. Create a project in your Telling dashboard');
-          print('2. Copy the project API key');
-          print('3. Update Telling.instance.init() with the correct key');
-          print('');
-          print('Backend URL: $_baseUrl');
-          print('Current API key: ${_apiKey!.substring(0, 8)}...');
-          print('━' * 60);
+          if (kDebugMode) {
+            print('━' * 60);
+            print('🚨 Telling SDK: INVALID API KEY');
+            print('━' * 60);
+            print('Your API key is not recognized by the backend.');
+            print('');
+            print('To fix this:');
+            print('1. Create a project in your Telling dashboard');
+            print('2. Copy the project API key');
+            print('3. Update Telling.instance.init() with the correct key');
+            print('');
+            print('Backend URL: $_baseUrl');
+            print('Current API key: ${_apiKey!.substring(0, 8)}...');
+            print('━' * 60);
+          }
         } else {
-          print(
-            'Telling: Invalid API key (attempt $_consecutiveFailures/$_maxConsecutiveFailures)',
-          );
+          if (kDebugMode) {
+            print(
+              'Telling: Invalid API key (attempt $_consecutiveFailures/$_maxConsecutiveFailures)',
+            );
+          }
           // Don't put back in buffer - discard on 403
           _buffer.clear();
           _persistLogs();
@@ -429,14 +459,18 @@ class Telling {
         _consecutiveFailures++;
 
         if (_consecutiveFailures >= _maxConsecutiveFailures) {
-          print(
-            'Telling: Giving up after $_maxConsecutiveFailures failures. Status: ${response.statusCode}',
-          );
+          if (kDebugMode) {
+            print(
+              'Telling: Giving up after $_maxConsecutiveFailures failures. Status: ${response.statusCode}',
+            );
+          }
           _buffer.clear(); // Stop retrying
         } else {
-          print(
-            'Telling: Failed to send logs (${response.statusCode}). Will retry ($_consecutiveFailures/$_maxConsecutiveFailures)',
-          );
+          if (kDebugMode) {
+            print(
+              'Telling: Failed to send logs (${response.statusCode}). Will retry ($_consecutiveFailures/$_maxConsecutiveFailures)',
+            );
+          }
           _buffer.addAll(eventsToSend); // Retry
         }
         _persistLogs();
@@ -446,14 +480,18 @@ class Telling {
       _consecutiveFailures++;
 
       if (_consecutiveFailures >= _maxConsecutiveFailures) {
-        print(
-          'Telling: Network error, giving up after $_consecutiveFailures attempts: $e',
-        );
+        if (kDebugMode) {
+          print(
+            'Telling: Network error, giving up after $_consecutiveFailures attempts: $e',
+          );
+        }
         _buffer.clear(); // Stop retrying
       } else {
-        print(
-          'Telling: Network error, will retry ($_consecutiveFailures/$_maxConsecutiveFailures): $e',
-        );
+        if (kDebugMode) {
+          print(
+            'Telling: Network error, will retry ($_consecutiveFailures/$_maxConsecutiveFailures): $e',
+          );
+        }
         _buffer.addAll(eventsToSend); // Retry
       }
       _persistLogs();
@@ -466,7 +504,9 @@ class Telling {
       final logsJson = _buffer.map((e) => jsonEncode(e.toJson())).toList();
       await prefs.setStringList(_storageKey, logsJson);
     } catch (e) {
-      print('Telling: Failed to persist logs: $e');
+      if (kDebugMode) {
+        print('Telling: Failed to persist logs: $e');
+      }
     }
   }
 
@@ -476,7 +516,9 @@ class Telling {
       final logsJson = prefs.getStringList(_storageKey);
 
       if (logsJson != null && logsJson.isNotEmpty) {
-        print('Telling: Found ${logsJson.length} unsent logs on disk.');
+        if (kDebugMode) {
+          print('Telling: Found ${logsJson.length} unsent logs on disk.');
+        }
         for (var logString in logsJson) {
           try {
             final map = jsonDecode(logString);
@@ -502,14 +544,18 @@ class Telling {
             );
             _buffer.add(event);
           } catch (e) {
-            print('Telling: Error parsing persisted log: $e');
+            if (kDebugMode) {
+              print('Telling: Error parsing persisted log: $e');
+            }
           }
         }
         // Try to send immediately
         _flush();
       }
     } catch (e) {
-      print('Telling: Failed to load persisted logs: $e');
+      if (kDebugMode) {
+        print('Telling: Failed to load persisted logs: $e');
+      }
     }
   }
   

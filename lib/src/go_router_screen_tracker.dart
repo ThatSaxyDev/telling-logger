@@ -77,7 +77,7 @@ class GoRouterScreenTracker extends NavigatorObserver {
   }
   
   /// Helper to extract route info for debugging
-  String _routeStr(Route<dynamic> route) {
-    return 'route(${route.settings.name}: ${route.settings.arguments})';
-  }
+  // String _routeStr(Route<dynamic> route) {
+  //   return 'route(${route.settings.name}: ${route.settings.arguments})';
+  // }
 }
