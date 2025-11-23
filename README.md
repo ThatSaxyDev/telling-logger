@@ -45,6 +45,14 @@ Then install:
 flutter pub get
 ```
 
+## 🔑 Get Your API Key
+
+To use Telling Logger, you need an API key.
+
+1. Go to the [Telling Dashboard](https://telling-5wkzr8a-thatsaxydev.globeapp.dev/).
+2. Log in or create an account.
+3. Create a new project to obtain your API key.
+
 ## 🚀 Quick Start
 
 ### 1. Initialize the SDK
@@ -433,7 +441,7 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙋 Support
 
-- � [Documentation](https://github.com/ThatSaxyDev/telling-logger/wiki)
+- � [Documentation](https://github.com/ThatSaxyDev/telling-logger)
 - 🐛 [Report Issues](https://github.com/ThatSaxyDev/telling-logger/issues)
 - � [Discussions](https://github.com/ThatSaxyDev/telling-logger/discussions)
 - 📧 Email: kiishidart@gmail.com
