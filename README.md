@@ -26,9 +26,7 @@ A **production-ready** crash reporting, error tracking, and analytics SDK for Fl
 
 - 🚀 **5-Minute Setup** – Initialize with a single line of code
 - 📝 **Production-Safe Logging** – Debug logs automatically stripped from release builds
-- 🔌 **Backend Agnostic** – Use our backend or build your own
 - 🎨 **Flexible API** – Multiple log levels, types, and metadata support
-- 📖 **Type-Safe** – Fully typed with comprehensive IntelliSense
 
 ## 📦 Installation
 
@@ -36,7 +34,7 @@ Add `telling_logger` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  telling_logger: ^1.0.0
+  telling_logger: ^1.0.4
 ```
 
 Then install:
@@ -49,7 +47,7 @@ flutter pub get
 
 To use Telling Logger, you need an API key.
 
-1. Go to the [Telling Dashboard](https://telling-5wkzr8a-thatsaxydev.globeapp.dev/).
+1. Go to the [Telling Dashboard](https://usetelling.netlify.app/).
 2. Log in or create an account.
 3. Create a new project to obtain your API key.
 

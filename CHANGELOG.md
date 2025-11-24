@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.4 - 2024-11-24
+
+### Improved
+- **Documentation**: Enhanced README with improved structure and clarity
+  - Refined feature descriptions and usage examples
+  - Better organization of sections
+
 ## 1.0.3 - 2024-11-23
 
 ### Improved
