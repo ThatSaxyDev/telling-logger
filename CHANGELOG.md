@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.7 - 2024-11-24
+
+### Fixed
+- **Documentation**: Updated README installation instructions to reflect the correct version.
+
 ## 1.0.6 - 2024-11-24
 
 ### Improved
