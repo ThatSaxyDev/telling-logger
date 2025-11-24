@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.8 - 2024-11-24
+
+### Improved
+- **General**: Minor fixes and improvements.
+
 ## 1.0.7 - 2024-11-24
 
 ### Fixed
