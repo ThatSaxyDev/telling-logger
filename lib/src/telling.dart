@@ -18,16 +18,16 @@ class Telling {
 
   String? _apiKey;
   final String _baseUrl =
-      'https://tellingserver-qsbx0dw-thatsaxydev.globeapp.dev/api/v1/logs';
+      'https://tellingserver-ii2opu6-thatsaxydev.globeapp.dev/api/v1/logs';
   bool _initialized = false;
   DeviceMetadata? _deviceMetadata;
   static const String _storageKey = 'telling_logs_buffer';
-  
+
   // User context
   String? _userId;
   String? _userName;
   String? _userEmail;
-  
+
   // Simple buffer to avoid spamming network
   final List<LogEvent> _buffer = [];
   Timer? _flushTimer;
@@ -35,10 +35,10 @@ class Telling {
 
   // Rate limiter
   final LogRateLimiter _rateLimiter = LogRateLimiter();
-  
+
   // Session tracking
   Session? _currentSession;
-  
+
   // Screen tracking
   ScreenTracker? _screenTracker;
   GoRouterScreenTracker? _goRouterScreenTracker;
@@ -46,7 +46,7 @@ class Telling {
   String? _currentScreen;
 
   Telling._internal();
-  
+
   // Retry tracking for failed flushes
   int _consecutiveFailures = 0;
   static const int _maxConsecutiveFailures = 2;
@@ -63,23 +63,23 @@ class Telling {
     _userId = userId;
     _userName = userName;
     _userEmail = userEmail;
-    
+
     _initialized = true;
-    
+
     // Collect device metadata
     _deviceMetadata = await DeviceInfoCollector.collect();
-    
+
     // Start new session
     _startNewSession();
-    
+
     // Load persisted logs
     await _loadPersistedLogs();
-    
+
     _startFlushTimer();
-    
+
     // Setup app lifecycle listeners
     _setupAppLifecycleListeners();
-    
+
     if (kDebugMode) {
       print('Telling SDK Initialized');
     }
@@ -95,13 +95,13 @@ class Telling {
       }
       return;
     }
-    
+
     // Catch Flutter framework errors
     FlutterError.onError = (details) {
       if (kDebugMode) {
         print('Telling: CAUGHT FLUTTER ERROR: ${details.exception}');
       }
-      
+
       // Determine severity based on error type
       final errorString = details.exception.toString().toLowerCase();
       final isRenderIssue =
@@ -123,7 +123,7 @@ class Telling {
       final type = (isRenderIssue || isLayoutIssue)
           ? LogType.general
           : LogType.crash;
-      
+
       log(
         'Flutter Error: ${details.exception}',
         level: level,
@@ -131,13 +131,13 @@ class Telling {
         stackTrace: details.stack,
         type: type,
       );
-      
+
       // Still print to console in debug mode
       if (kDebugMode) {
         FlutterError.dumpErrorToConsole(details);
       }
     };
-    
+
     // Catch async errors
     PlatformDispatcher.instance.onError = (error, stack) {
       if (kDebugMode) {
@@ -154,7 +154,7 @@ class Telling {
       );
       return true;
     };
-    
+
     if (kDebugMode) {
       print('Telling: Crash reporting enabled');
     }
@@ -232,8 +232,7 @@ class Telling {
     _endSession();
     _startNewSession();
   }
-  
-  
+
   /// Get the screen tracker for use with Navigator
   RouteObserver<PageRoute> get screenTracker {
     _screenTracker ??= ScreenTracker(onScreenView: _handleScreenView);
@@ -288,7 +287,6 @@ class Telling {
     );
   }
 
-
   /// Log a message
   void log(
     String message, {
@@ -312,7 +310,9 @@ class Telling {
       level: level,
       message: message,
       timestamp: DateTime.now(),
-      stackTrace: stackTrace?.toString() ?? (error is Error ? error.stackTrace?.toString() : null),
+      stackTrace:
+          stackTrace?.toString() ??
+          (error is Error ? error.stackTrace?.toString() : null),
       metadata: metadata,
       deviceMetadata: _deviceMetadata,
       userId: _userId,
@@ -332,7 +332,7 @@ class Telling {
     _buffer.add(event);
     _rateLimiter.markLogSent(event);
     _persistLogs(); // Save to disk immediately
-    
+
     // If error, flush immediately
     if (level == LogLevel.error) {
       _flush();
@@ -342,7 +342,7 @@ class Telling {
   void _startFlushTimer() {
     _flushTimer?.cancel();
     _flushTimer = Timer.periodic(const Duration(seconds: 5), (_) => _flush());
-    
+
     // Periodic cleanup for rate limiter
     _cleanupTimer?.cancel();
     _cleanupTimer = Timer.periodic(const Duration(minutes: 2), (_) {
@@ -352,7 +352,7 @@ class Telling {
 
   Future<void> _flush() async {
     if (_buffer.isEmpty) return;
-    
+
     // Skip if we've hit permanent failure (e.g., bad API key)
     if (_permanentFailure) {
       if (kDebugMode) {
@@ -378,8 +378,8 @@ class Telling {
     if (kDebugMode && eventsToSend.length < _buffer.length) {
       if (kDebugMode) {
         print(
-        'Telling: Deduplicated buffer: ${_buffer.length} → ${eventsToSend.length} unique logs',
-      );
+          'Telling: Deduplicated buffer: ${_buffer.length} → ${eventsToSend.length} unique logs',
+        );
       }
     }
 
@@ -388,16 +388,13 @@ class Telling {
       // if (kDebugMode) {
       //   print('Telling: Sending ${eventsToSend.length} logs to $_baseUrl');
       // }
-      
+
       final response = await http.post(
         Uri.parse(_baseUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': _apiKey!,
-        },
+        headers: {'Content-Type': 'application/json', 'x-api-key': _apiKey!},
         body: jsonEncode(eventsToSend.map((e) => e.toJson()).toList()),
       );
-      
+
       if (response.statusCode == 200) {
         // Success! Reset failure counter and clear from persistence
         _consecutiveFailures = 0;
@@ -457,7 +454,6 @@ class Telling {
         }
         _persistLogs();
       }
-      
     } catch (e) {
       _consecutiveFailures++;
 
@@ -540,7 +536,7 @@ class Telling {
       }
     }
   }
-  
+
   // ===== Session Management =====
 
   /// Start a new session
@@ -606,7 +602,7 @@ class Telling {
       _AppLifecycleObserver(onPause: _endSession, onResume: _startNewSession),
     );
   }
-  
+
   void dispose() {
     _flushTimer?.cancel();
   }
