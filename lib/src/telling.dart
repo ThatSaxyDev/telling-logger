@@ -460,14 +460,14 @@ class Telling {
       if (_consecutiveFailures >= _maxConsecutiveFailures) {
         if (kDebugMode) {
           print(
-            'Telling: Network error, giving up after $_consecutiveFailures attempts: $e',
+            'Telling: Connection issue, giving up after $_consecutiveFailures attempts. Logs buffered.',
           );
         }
         _buffer.clear(); // Stop retrying
       } else {
         if (kDebugMode) {
           print(
-            'Telling: Network error, will retry ($_consecutiveFailures/$_maxConsecutiveFailures): $e',
+            'Telling: Connection issue, will retry ($_consecutiveFailures/$_maxConsecutiveFailures)...',
           );
         }
         _buffer.addAll(eventsToSend); // Retry
