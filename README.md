@@ -34,7 +34,7 @@ Add `telling_logger` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  telling_logger: ^1.0.14
+  telling_logger: ^1.0.15
 ```
 
 Then install:
@@ -47,7 +47,7 @@ flutter pub get
 
 To use Telling Logger, you need an API key.
 
-1. Go to the [Telling Dashboard](https://usetelling.netlify.app/).
+1. Go to the [Telling Dashboard](https://telling.cv/).
 2. Log in or create an account.
 3. Create a new project to obtain your API key.
 
