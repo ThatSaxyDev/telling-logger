@@ -6,8 +6,7 @@ void main() async {
 
   // Initialize Telling SDK
   // Replace 'YOUR_API_KEY' with a valid key from your dashboard
-  await Telling.instance.init('b30-A25bpbnaKm15yjv47z2beTYnYCNeeN12bAIQAUI=',
-      enableDebugLogs: true);
+  await Telling.instance.init('API-KEY', enableDebugLogs: true);
 
   // Enable crash reporting
   Telling.instance.enableCrashReporting();
