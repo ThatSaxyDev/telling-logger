@@ -24,12 +24,14 @@ class LogRateLimiter {
   int _logsThisSecond = 0;
   DateTime? _currentSecond;
 
-  /// Generate a hash for a log event based on message, level, and stack trace
+  /// Generate a hash for a log event based on message, level, stack trace, AND metadata
   String _hashLog(LogEvent event) {
     final parts = [
       event.message,
       event.level.toString(),
       event.stackTrace ?? '',
+      event.metadata
+          .toString(), // Include metadata in hash to differentiate sessions
     ];
     return parts.join('|').hashCode.toString();
   }
@@ -63,15 +65,17 @@ class LogRateLimiter {
     }
 
     // 3. Check type-specific throttling
+    // Only throttle crashes and exceptions to prevent flood loops.
+    // Allow analytics and general logs to flow freely (bounded by maxLogsPerSecond).
     final isCrashOrException = event.type == LogType.crash ||
         event.type == LogType.exception;
-    final throttleDuration =
-        isCrashOrException ? crashThrottleWindow : throttleWindow;
-
-    final lastSentOfType = _lastSentByType[throttleKey];
-    if (lastSentOfType != null &&
-        now.difference(lastSentOfType) < throttleDuration) {
-      return false; // Throttled
+    
+    if (isCrashOrException) {
+      final lastSentOfType = _lastSentByType[throttleKey];
+      if (lastSentOfType != null &&
+          now.difference(lastSentOfType) < crashThrottleWindow) {
+        return false; // Throttled
+      }
     }
 
     return true; // OK to send
