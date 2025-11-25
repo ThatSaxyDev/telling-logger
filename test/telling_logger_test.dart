@@ -4,6 +4,7 @@ import 'package:telling_logger/telling_logger.dart';
 
 void main() {
   test('Telling initialization and logging', () {
+    TestWidgetsFlutterBinding.ensureInitialized();
     final telling = Telling.instance;
     
     // Test initialization

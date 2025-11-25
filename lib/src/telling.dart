@@ -589,6 +589,44 @@ class Telling {
     }
   }
 
+  DateTime? _lastBackgroundTime;
+  static const Duration _sessionTimeout = Duration(minutes: 5);
+
+  void _onAppPaused() {
+    _lastBackgroundTime = DateTime.now();
+    _flush(); // Ensure logs are sent before potential OS kill
+  }
+
+  void _onAppResumed() {
+    if (_lastBackgroundTime != null) {
+      final timeInBackground = DateTime.now().difference(_lastBackgroundTime!);
+
+      if (timeInBackground > _sessionTimeout) {
+        // Session timed out - end old one and start new one
+        if (kDebugMode) {
+          print(
+            'Telling: Session timed out (${timeInBackground.inMinutes}m). Starting new session.',
+          );
+        }
+        _endSession();
+        _startNewSession();
+      } else {
+        // Continue current session
+        if (kDebugMode) {
+          print(
+            'Telling: Resuming session (backgrounded for ${timeInBackground.inSeconds}s)',
+          );
+        }
+      }
+      _lastBackgroundTime = null;
+    } else {
+      // Should not happen usually, but safe fallback
+      if (_currentSession == null) {
+        _startNewSession();
+      }
+    }
+  }
+
   /// Generate a unique session ID
   String _generateSessionId() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -599,7 +637,11 @@ class Telling {
   /// Setup app lifecycle listeners for session tracking
   void _setupAppLifecycleListeners() {
     WidgetsBinding.instance.addObserver(
-      _AppLifecycleObserver(onPause: _endSession, onResume: _startNewSession),
+      _AppLifecycleObserver(
+        onPause: _onAppPaused,
+        onResume: _onAppResumed,
+        onDetach: _endSession, // End session immediately on detach
+      ),
     );
   }
 
@@ -612,16 +654,22 @@ class Telling {
 class _AppLifecycleObserver extends WidgetsBindingObserver {
   final VoidCallback onPause;
   final VoidCallback onResume;
+  final VoidCallback onDetach;
 
-  _AppLifecycleObserver({required this.onPause, required this.onResume});
+  _AppLifecycleObserver({
+    required this.onPause,
+    required this.onResume,
+    required this.onDetach,
+  });
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached) {
+    if (state == AppLifecycleState.paused) {
       onPause();
     } else if (state == AppLifecycleState.resumed) {
       onResume();
+    } else if (state == AppLifecycleState.detached) {
+      onDetach();
     }
   }
 }
