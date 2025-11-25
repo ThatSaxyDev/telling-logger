@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.10 - 2024-11-25
+
+### Added
+- **Debug Logs Control**: Added optional `enableDebugLogs` parameter to `init()` method.
+  - Allows developers to explicitly control debug log output
+  - Defaults to `true` in debug mode (`kDebugMode`), `false` in release mode
+  - Can be set to `false` to disable debug logs even in debug builds
+
+### Improved
+- **Developer Experience**: Better control over console output during development.
+
 ## 1.0.9 - 2024-11-25
 
 ### Added

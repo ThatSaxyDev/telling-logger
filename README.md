@@ -34,7 +34,7 @@ Add `telling_logger` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  telling_logger: ^1.0.9
+  telling_logger: ^1.0.10
 ```
 
 Then install:
@@ -67,6 +67,7 @@ void main() async {
   // Initialize Telling SDK
   await Telling.instance.init(
     'YOUR_API_KEY',
+    enableDebugLogs: true, // Optional: Control debug logs (defaults to true in debug mode)
   );
   
   // Enable automatic crash reporting
@@ -311,6 +312,7 @@ await Telling.instance.init(
     String? userId,                   // Initial user ID
     String? userName,                 // Initial user name
     String? userEmail,                // Initial user email
+    bool? enableDebugLogs,            // Control debug logs (defaults to kDebugMode)
   }
 );
 ```
@@ -330,6 +332,26 @@ void main() async {
   runApp(MyApp());
 }
 ```
+
+### Debug Logs Control
+
+```dart
+// Disable debug logs even in debug mode
+await Telling.instance.init(
+  'YOUR_API_KEY',
+  enableDebugLogs: false,
+);
+
+// Enable debug logs explicitly
+await Telling.instance.init(
+  'YOUR_API_KEY',
+  enableDebugLogs: true,
+);
+
+// Default behavior (true in debug mode, false in release)
+await Telling.instance.init(
+  'YOUR_API_KEY',
+);
 
 ## 🎓 Best Practices
 

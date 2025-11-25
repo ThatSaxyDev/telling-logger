@@ -22,6 +22,7 @@ class Telling {
   bool _initialized = false;
   DeviceMetadata? _deviceMetadata;
   static const String _storageKey = 'telling_logs_buffer';
+  bool _enableDebugLogs = false;
 
   // User context
   String? _userId;
@@ -58,11 +59,13 @@ class Telling {
     String? userId,
     String? userName,
     String? userEmail,
+    bool? enableDebugLogs,
   }) async {
     _apiKey = apiKey;
     _userId = userId;
     _userName = userName;
     _userEmail = userEmail;
+    _enableDebugLogs = enableDebugLogs ?? kDebugMode;
 
     _initialized = true;
 
@@ -80,7 +83,7 @@ class Telling {
     // Setup app lifecycle listeners
     _setupAppLifecycleListeners();
 
-    if (kDebugMode) {
+    if (_enableDebugLogs) {
       print('Telling SDK Initialized');
     }
   }
@@ -88,7 +91,7 @@ class Telling {
   /// Enable automatic crash reporting
   void enableCrashReporting() {
     if (!_initialized) {
-      if (kDebugMode) {
+      if (_enableDebugLogs) {
         print(
           'Telling SDK not initialized. Call Telling.instance.init() first.',
         );
@@ -98,7 +101,7 @@ class Telling {
 
     // Catch Flutter framework errors
     FlutterError.onError = (details) {
-      if (kDebugMode) {
+      if (_enableDebugLogs) {
         print('Telling: CAUGHT FLUTTER ERROR: ${details.exception}');
       }
 
@@ -133,14 +136,14 @@ class Telling {
       );
 
       // Still print to console in debug mode
-      if (kDebugMode) {
+      if (_enableDebugLogs) {
         FlutterError.dumpErrorToConsole(details);
       }
     };
 
     // Catch async errors
     PlatformDispatcher.instance.onError = (error, stack) {
-      if (kDebugMode) {
+      if (_enableDebugLogs) {
         print('Telling: CAUGHT PLATFORM ERROR: $error');
       }
 
@@ -155,7 +158,7 @@ class Telling {
       return true;
     };
 
-    if (kDebugMode) {
+    if (_enableDebugLogs) {
       print('Telling: Crash reporting enabled');
     }
   }
@@ -173,7 +176,7 @@ class Telling {
   /// Set user context (call after user logs in)
   void setUser({required String userId, String? userName, String? userEmail}) {
     if (!_initialized) {
-      if (kDebugMode) {
+      if (_enableDebugLogs) {
         print(
           'Telling SDK not initialized. Call Telling.instance.init() first.',
         );
@@ -189,7 +192,7 @@ class Telling {
     _endSession();
     _startNewSession();
 
-    if (kDebugMode) {
+    if (_enableDebugLogs) {
       print('Telling: User context updated - $userId');
     }
 
@@ -209,7 +212,7 @@ class Telling {
   /// Clear user context (call after user logs out)
   void clearUser() {
     if (!_initialized) {
-      if (kDebugMode) {
+      if (_enableDebugLogs) {
         print(
           'Telling SDK not initialized. Call Telling.instance.init() first.',
         );
@@ -217,7 +220,7 @@ class Telling {
       return;
     }
 
-    if (kDebugMode) {
+    if (_enableDebugLogs) {
       print('Telling: User context cleared');
     }
 
@@ -270,7 +273,7 @@ class Telling {
     _currentScreen = screenName;
     _screenStartTime = now;
 
-    if (kDebugMode) {
+    if (_enableDebugLogs) {
       print(
         'Telling: Screen view - $screenName${previousScreen != null ? " (from $previousScreen)" : ""}',
       );
@@ -297,7 +300,7 @@ class Telling {
     LogType type = LogType.general,
   }) {
     if (!_initialized) {
-      if (kDebugMode) {
+      if (_enableDebugLogs) {
         print(
           'Telling SDK not initialized. Call Telling.instance.init() first.',
         );
@@ -323,7 +326,7 @@ class Telling {
 
     // Check rate limiter
     if (!_rateLimiter.shouldSendLog(event)) {
-      if (kDebugMode) {
+      if (_enableDebugLogs) {
         print('Telling: Rate limited log (${event.level}/${event.type})');
       }
       return; // Drop rate-limited log
@@ -355,7 +358,7 @@ class Telling {
 
     // Skip if we've hit permanent failure (e.g., bad API key)
     if (_permanentFailure) {
-      if (kDebugMode) {
+      if (_enableDebugLogs) {
         print(
           'Telling: Skipping flush due to permanent failure (check API key)',
         );
@@ -376,7 +379,7 @@ class Telling {
     _buffer.clear();
 
     if (kDebugMode && eventsToSend.length < _buffer.length) {
-      if (kDebugMode) {
+      if (_enableDebugLogs) {
         print(
           'Telling: Deduplicated buffer: ${_buffer.length} → ${eventsToSend.length} unique logs',
         );
@@ -408,7 +411,7 @@ class Telling {
           _buffer.clear(); // Don't retry
           _persistLogs();
 
-          if (kDebugMode) {
+          if (_enableDebugLogs) {
             print('━' * 60);
             print('🚨 Telling SDK: INVALID API KEY');
             print('━' * 60);
@@ -424,7 +427,7 @@ class Telling {
             print('━' * 60);
           }
         } else {
-          if (kDebugMode) {
+          if (_enableDebugLogs) {
             print(
               'Telling: Invalid API key (attempt $_consecutiveFailures/$_maxConsecutiveFailures)',
             );
@@ -438,14 +441,14 @@ class Telling {
         _consecutiveFailures++;
 
         if (_consecutiveFailures >= _maxConsecutiveFailures) {
-          if (kDebugMode) {
+          if (_enableDebugLogs) {
             print(
               'Telling: Giving up after $_maxConsecutiveFailures failures. Status: ${response.statusCode}',
             );
           }
           _buffer.clear(); // Stop retrying
         } else {
-          if (kDebugMode) {
+          if (_enableDebugLogs) {
             print(
               'Telling: Failed to send logs (${response.statusCode}). Will retry ($_consecutiveFailures/$_maxConsecutiveFailures)',
             );
@@ -458,14 +461,14 @@ class Telling {
       _consecutiveFailures++;
 
       if (_consecutiveFailures >= _maxConsecutiveFailures) {
-        if (kDebugMode) {
+        if (_enableDebugLogs) {
           print(
             'Telling: Connection issue, giving up after $_consecutiveFailures attempts. Logs buffered.',
           );
         }
         _buffer.clear(); // Stop retrying
       } else {
-        if (kDebugMode) {
+        if (_enableDebugLogs) {
           print(
             'Telling: Connection issue, will retry ($_consecutiveFailures/$_maxConsecutiveFailures)...',
           );
@@ -482,7 +485,7 @@ class Telling {
       final logsJson = _buffer.map((e) => jsonEncode(e.toJson())).toList();
       await prefs.setStringList(_storageKey, logsJson);
     } catch (e) {
-      if (kDebugMode) {
+      if (_enableDebugLogs) {
         print('Telling: Failed to persist logs: $e');
       }
     }
@@ -494,7 +497,7 @@ class Telling {
       final logsJson = prefs.getStringList(_storageKey);
 
       if (logsJson != null && logsJson.isNotEmpty) {
-        if (kDebugMode) {
+        if (_enableDebugLogs) {
           print('Telling: Found ${logsJson.length} unsent logs on disk.');
         }
         for (var logString in logsJson) {
@@ -522,7 +525,7 @@ class Telling {
             );
             _buffer.add(event);
           } catch (e) {
-            if (kDebugMode) {
+            if (_enableDebugLogs) {
               print('Telling: Error parsing persisted log: $e');
             }
           }
@@ -531,7 +534,7 @@ class Telling {
         _flush();
       }
     } catch (e) {
-      if (kDebugMode) {
+      if (_enableDebugLogs) {
         print('Telling: Failed to load persisted logs: $e');
       }
     }
@@ -549,7 +552,7 @@ class Telling {
       userName: _userName,
     );
 
-    if (kDebugMode) {
+    if (_enableDebugLogs) {
       print('Telling: Started session ${_currentSession!.sessionId}');
     }
 
@@ -570,7 +573,7 @@ class Telling {
     if (_currentSession != null && _currentSession!.isActive) {
       _currentSession!.endTime = DateTime.now();
 
-      if (kDebugMode) {
+      if (_enableDebugLogs) {
         print(
           'Telling: Ended session ${_currentSession!.sessionId} (duration: ${_currentSession!.duration?.inSeconds}s)',
         );
@@ -603,7 +606,7 @@ class Telling {
 
       if (timeInBackground > _sessionTimeout) {
         // Session timed out - end old one and start new one
-        if (kDebugMode) {
+        if (_enableDebugLogs) {
           print(
             'Telling: Session timed out (${timeInBackground.inMinutes}m). Starting new session.',
           );
@@ -612,7 +615,7 @@ class Telling {
         _startNewSession();
       } else {
         // Continue current session
-        if (kDebugMode) {
+        if (_enableDebugLogs) {
           print(
             'Telling: Resuming session (backgrounded for ${timeInBackground.inSeconds}s)',
           );
