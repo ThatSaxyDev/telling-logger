@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.9 - 2024-11-25
+
+### Added
+- **Example**: Added initial Flutter example project with platform configurations.
+- **Session Management**: Implemented session timeout logic based on app lifecycle state changes.
+
+### Improved
+- **Lifecycle**: Refined app lifecycle observer for better session tracking.
+
+### Changed
+- **API**: Removed `rate_limiter` export to simplify public API.
+
 ## 1.0.8 - 2024-11-24
 
 ### Improved
