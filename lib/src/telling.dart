@@ -18,7 +18,7 @@ class Telling {
 
   String? _apiKey;
   final String _baseUrl =
-      'https://tellingserver-5holsnj-thatsaxydev.globeapp.dev/api/v1/logs';
+      'https://tellingserver-a1lywqo-thatsaxydev.globeapp.dev/api/v1/logs';
   bool _initialized = false;
   DeviceMetadata? _deviceMetadata;
   static const String _storageKey = 'telling_logs_buffer';

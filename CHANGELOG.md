@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.12 - 2024-11-25
+
+### Changed
+- **Internal**: Updated backend API URL to point to the new server instance.
+
 ## 1.0.11 - 2024-11-25
 
 ### Added
