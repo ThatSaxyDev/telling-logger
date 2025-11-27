@@ -172,6 +172,52 @@ Telling.instance.clearUser();
 
 All subsequent logs will automatically include user information until cleared.
 
+### User Properties
+
+Track custom user attributes for segmentation and personalization:
+
+```dart
+// Set individual properties
+Telling.instance.setUserProperty('subscription_tier', 'premium');
+Telling.instance.setUserProperty('plan_renewal_date', '2025-12-31');
+
+// Set multiple properties at once
+Telling.instance.setUserProperties({
+  'subscription_tier': 'premium',
+  'mrr': 99.99,
+  'seats': 5,
+  'industry': 'SaaS',
+});
+
+// Get property value
+final tier = Telling.instance.getUserProperty('subscription_tier');
+
+// Clear properties
+Telling.instance.clearUserProperty('mrr');
+Telling.instance.clearUserProperties(); // Clear all
+```
+
+User properties are automatically included in all log events, enabling powerful segmentation in your analytics dashboard.
+
+### Automatic Performance Tracking (Coming Soon)
+<!-- 
+Enable automatic performance monitoring:
+
+```dart
+await Telling.instance.init(
+  'YOUR_API_KEY',
+  enablePerformanceTracking: true,
+);
+```
+
+Automatically tracks:
+- **App Startup Time** - Time from app launch to first frame
+- **Frame Rate (FPS)** - Average frames per second
+- **Memory Usage** - Periodic memory snapshots
+
+Performance metrics are sent as `LogType.performance` events.
+-->
+
 ### Automatic Screen Tracking
 
 #### With MaterialApp

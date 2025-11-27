@@ -11,13 +11,15 @@ import 'device_info_collector.dart';
 import 'rate_limiter.dart';
 import 'screen_tracker.dart';
 import 'go_router_screen_tracker.dart';
+// import 'performance_tracker.dart';
 
 class Telling {
   static final Telling _instance = Telling._internal();
   static Telling get instance => _instance;
 
   String? _apiKey;
-  final String _baseUrl = 'https://tellingserver.globeapp.dev/api/v1/logs';
+  final String _baseUrl =
+      'https://tellingserver-pdfuqgj-thatsaxydev.globeapp.dev/api/v1/logs';
   bool _initialized = false;
   DeviceMetadata? _deviceMetadata;
   static const String _storageKey = 'telling_logs_buffer';
@@ -27,6 +29,9 @@ class Telling {
   String? _userId;
   String? _userName;
   String? _userEmail;
+
+  // User properties for segmentation
+  final Map<String, dynamic> _userProperties = {};
 
   // Simple buffer to avoid spamming network
   final List<LogEvent> _buffer = [];
@@ -45,6 +50,9 @@ class Telling {
   DateTime? _screenStartTime;
   String? _currentScreen;
 
+  // Performance tracking
+  // PerformanceTracker? _performanceTracker;
+
   Telling._internal();
 
   // Retry tracking for failed flushes
@@ -59,6 +67,7 @@ class Telling {
     String? userName,
     String? userEmail,
     bool? enableDebugLogs,
+    // bool enablePerformanceTracking = false,
   }) async {
     _apiKey = apiKey;
     _userId = userId;
@@ -67,6 +76,18 @@ class Telling {
     _enableDebugLogs = enableDebugLogs ?? kDebugMode;
 
     _initialized = true;
+
+    // Performance tracking - Disabled for MVP, uncomment when scaling
+    // if (enablePerformanceTracking) {
+    //   _performanceTracker = PerformanceTracker((metric, data) {
+    //     log(
+    //       metric,
+    //       type: LogType.performance,
+    //       metadata: data,
+    //     );
+    //   });
+    //   _performanceTracker!.start();
+    // }
 
     // Collect device metadata
     _deviceMetadata = await DeviceInfoCollector.collect();
@@ -235,6 +256,45 @@ class Telling {
     _startNewSession();
   }
 
+  /// Set a single user property
+  void setUserProperty(String key, dynamic value) {
+    _userProperties[key] = value;
+
+    // Log property change
+    log(
+      'User property set',
+      type: LogType.analytics,
+      metadata: {'property_key': key, 'property_value': value},
+    );
+  }
+
+  /// Set multiple user properties at once
+  void setUserProperties(Map<String, dynamic> properties) {
+    _userProperties.addAll(properties);
+
+    // Log property change
+    log(
+      'User properties set',
+      type: LogType.analytics,
+      metadata: {'properties': properties},
+    );
+  }
+
+  /// Get a user property value
+  dynamic getUserProperty(String key) {
+    return _userProperties[key];
+  }
+
+  /// Clear a specific user property
+  void clearUserProperty(String key) {
+    _userProperties.remove(key);
+  }
+
+  /// Clear all user properties
+  void clearUserProperties() {
+    _userProperties.clear();
+  }
+
   /// Get the screen tracker for use with Navigator
   RouteObserver<PageRoute> get screenTracker {
     _screenTracker ??= ScreenTracker(onScreenView: _handleScreenView);
@@ -315,7 +375,10 @@ class Telling {
       stackTrace:
           stackTrace?.toString() ??
           (error is Error ? error.stackTrace?.toString() : null),
-      metadata: metadata,
+      metadata: {
+        ...?metadata,
+        if (_userProperties.isNotEmpty) '_user_properties': _userProperties,
+      },
       deviceMetadata: _deviceMetadata,
       userId: _userId,
       userName: _userName,
@@ -421,7 +484,6 @@ class Telling {
             print('2. Copy the project API key');
             print('3. Update Telling.instance.init() with the correct key');
             print('');
-            print('Backend URL: $_baseUrl');
             print('Current API key: ${_apiKey!.substring(0, 8)}...');
             print('━' * 60);
           }
