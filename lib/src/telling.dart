@@ -19,7 +19,7 @@ class Telling {
 
   String? _apiKey;
   final String _baseUrl =
-      'https://tellingserver-pdfuqgj-thatsaxydev.globeapp.dev/api/v1/logs';
+      'https://tellingserver-tttcjdx-thatsaxydev.globeapp.dev/api/v1/logs';
   bool _initialized = false;
   DeviceMetadata? _deviceMetadata;
   static const String _storageKey = 'telling_logs_buffer';
@@ -190,6 +190,31 @@ class Telling {
       level: LogLevel.info,
       metadata: properties,
       type: LogType.analytics,
+    );
+  }
+
+  /// Track a funnel step
+  ///
+  /// Usage:
+  /// ```dart
+  /// Telling.instance.trackFunnel('onboarding', 'email_entered', step: 1);
+  /// ```
+  void trackFunnel(
+    String funnelName,
+    String stepName, {
+    int? step,
+    Map<String, dynamic>? properties,
+  }) {
+    log(
+      'Funnel: $funnelName - $stepName',
+      level: LogLevel.info,
+      type: LogType.analytics,
+      metadata: {
+        'funnel_name': funnelName,
+        'funnel_step_name': stepName,
+        if (step != null) 'funnel_step_number': step,
+        ...?properties,
+      },
     );
   }
 

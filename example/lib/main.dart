@@ -230,9 +230,26 @@ class HomeScreen extends StatelessWidget {
             const Divider(),
 
             // User Properties Section
-            const Text(
-              'User Properties',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Row(
+              spacing: 10,
+              children: [
+                const Text(
+                  'User Properties',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const UserPropertiesScreen(),
+                        settings:
+                            const RouteSettings(name: 'UserPropertiesScreen'),
+                      ),
+                    );
+                  },
+                  child: const Text('Panel'),
+                ),
+              ],
             ),
             const SizedBox(height: 10),
             Wrap(
@@ -355,6 +372,18 @@ class HomeScreen extends StatelessWidget {
                   },
                   icon: const Icon(Icons.shopping_cart, size: 18),
                   label: const Text('Track Purchase'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const CheckoutScreen(),
+                        settings: const RouteSettings(name: 'CheckoutScreen'),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.shopping_cart, size: 18),
+                  label: const Text('Checkout'),
                 ),
               ],
             ),
@@ -638,6 +667,151 @@ class _QuickPropertyButton extends StatelessWidget {
           ? ElevatedButton.styleFrom(backgroundColor: color)
           : null,
       child: Text(label),
+    );
+  }
+}
+
+class CheckoutScreen extends StatefulWidget {
+  const CheckoutScreen({super.key});
+
+  @override
+  State<CheckoutScreen> createState() => _CheckoutScreenState();
+}
+
+class _CheckoutScreenState extends State<CheckoutScreen> {
+  int _currentStep = 0;
+  final _shippingController = TextEditingController();
+  final _cardController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Track Step 1: Cart Viewed
+    Telling.instance.trackFunnel(
+      'checkout_flow',
+      'cart_viewed',
+      step: 1,
+      properties: {'item_count': 2, 'total_value': 49.99},
+    );
+  }
+
+  void _nextStep() {
+    if (_currentStep == 0) {
+      // Moving to Shipping
+      setState(() => _currentStep = 1);
+      Telling.instance.trackFunnel(
+        'checkout_flow',
+        'shipping_started',
+        step: 2,
+      );
+    } else if (_currentStep == 1) {
+      // Moving to Payment
+      if (_shippingController.text.isNotEmpty) {
+        setState(() => _currentStep = 2);
+        Telling.instance.trackFunnel(
+          'checkout_flow',
+          'shipping_completed',
+          step: 3,
+          properties: {'address_length': _shippingController.text.length},
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter shipping info')),
+        );
+      }
+    } else if (_currentStep == 2) {
+      // Completing Order
+      if (_cardController.text.isNotEmpty) {
+        Telling.instance.trackFunnel(
+          'checkout_flow',
+          'payment_completed',
+          step: 4,
+          properties: {'payment_method': 'credit_card'},
+        );
+
+        // Track the final conversion event too
+        Telling.instance.event('purchase_completed', properties: {
+          'amount': 49.99,
+          'currency': 'USD',
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('🎉 Order Placed! Funnel Complete.')),
+        );
+        Navigator.of(context).pop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter card info')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Checkout Flow')),
+      body: Stepper(
+        currentStep: _currentStep,
+        onStepContinue: _nextStep,
+        onStepCancel: () {
+          if (_currentStep > 0) {
+            setState(() => _currentStep -= 1);
+          } else {
+            Navigator.of(context).pop();
+          }
+        },
+        steps: [
+          Step(
+            title: const Text('Review Cart'),
+            content: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ListTile(
+                  leading: Icon(Icons.shopping_bag),
+                  title: Text('Premium Plan'),
+                  subtitle: Text('\$49.99 / month'),
+                ),
+                ListTile(
+                  leading: Icon(Icons.confirmation_number),
+                  title: Text('Setup Fee'),
+                  subtitle: Text('\$0.00'),
+                ),
+                Divider(),
+                Text('Total: \$49.99',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+            isActive: _currentStep >= 0,
+            state: _currentStep > 0 ? StepState.complete : StepState.editing,
+          ),
+          Step(
+            title: const Text('Shipping Info'),
+            content: TextField(
+              controller: _shippingController,
+              decoration: const InputDecoration(
+                labelText: 'Shipping Address',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            isActive: _currentStep >= 1,
+            state: _currentStep > 1 ? StepState.complete : StepState.editing,
+          ),
+          Step(
+            title: const Text('Payment'),
+            content: TextField(
+              controller: _cardController,
+              decoration: const InputDecoration(
+                labelText: 'Card Number (Fake)',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            isActive: _currentStep >= 2,
+            state: StepState.editing,
+          ),
+        ],
+      ),
     );
   }
 }

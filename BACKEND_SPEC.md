@@ -319,6 +319,102 @@ WHERE project_id = $1
 GROUP BY metadata->'_user_properties'->>'subscription_tier';
 ```
 
+### Funnel List (Discovery)
+
+Get a list of all available funnels, with optional search.
+
+**Endpoint:** `GET /api/v1/analytics/funnel-names`
+
+**Query Parameters:**
+- `search` - (optional) Filter by funnel name
+- `limit` - (optional) default 20
+- `offset` - (optional) default 0
+
+**Response:** `200 OK`
+```json
+{
+  "funnels": [
+    "checkout_flow",
+    "onboarding",
+    "invite_friend"
+  ],
+  "total": 3
+}
+```
+
+**Query:**
+```sql
+SELECT DISTINCT metadata->>'funnel_name' as funnel_name
+FROM logs
+WHERE project_id = $1
+  AND type = 'analytics'
+  AND metadata->>'funnel_name' IS NOT NULL
+  AND ($2::text IS NULL OR metadata->>'funnel_name' ILIKE '%' || $2 || '%')
+ORDER BY funnel_name
+LIMIT $3 OFFSET $4;
+```
+
+### Funnel Analysis
+
+Track user conversion through a sequence of events (e.g., Signup Started -> Email Entered -> Signup Completed).
+
+**Concept:**
+1. Identify users who performed Step 1.
+2. From those users, find who performed Step 2 *after* Step 1.
+3. From those users, find who performed Step 3 *after* Step 2.
+
+**Automatic Step Discovery:**
+
+Since the SDK sends `funnel_step_number`, the backend can automatically discover the steps and their order:
+
+```sql
+SELECT DISTINCT 
+  metadata->>'funnel_step_name' as step_name,
+  (metadata->>'funnel_step_number')::int as step_number
+FROM logs
+WHERE project_id = $1
+  AND type = 'analytics'
+  AND metadata->>'funnel_name' = $2 -- funnelName e.g. 'checkout_flow'
+ORDER BY step_number ASC;
+```
+
+**Funnel Analysis Query (Dynamic):**
+
+Once the steps are discovered (or provided), construct the CTE query dynamically:
+
+```sql
+WITH step1 AS (
+  SELECT user_id, MIN(timestamp) as step1_time
+  FROM logs
+  WHERE project_id = $1
+    AND type = 'analytics'
+    AND metadata->>'funnel_name' = $2 -- funnelName
+    AND metadata->>'funnel_step_name' = $3 -- step1 name (from discovery)
+    AND timestamp BETWEEN $4 AND $5
+  GROUP BY user_id
+),
+step2 AS (
+  SELECT l.user_id, MIN(l.timestamp) as step2_time
+  FROM logs l
+  JOIN step1 s1 ON l.user_id = s1.user_id
+  WHERE l.project_id = $1
+    AND l.type = 'analytics'
+    AND l.metadata->>'funnel_name' = $2
+    AND l.metadata->>'funnel_step_name' = $6 -- step2 name (from discovery)
+    AND l.timestamp > s1.step1_time
+    AND l.timestamp < s1.step1_time + INTERVAL '1 hour'
+  GROUP BY l.user_id
+),
+-- ... repeat for all discovered steps ...
+SELECT 
+  (SELECT COUNT(*) FROM step1) as step1_count,
+  (SELECT COUNT(*) FROM step2) as step2_count,
+  -- ... select counts for all steps ...
+  ((SELECT COUNT(*) FROM step2)::float / NULLIF((SELECT COUNT(*) FROM step1), 0)) * 100 as conversion_1_to_2
+  -- ... calculate all conversions ...
+;
+```
+
 ---
 
 ## Data Retention

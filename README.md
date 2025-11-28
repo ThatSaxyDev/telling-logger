@@ -119,6 +119,14 @@ Telling.instance.event(
     'user_segment': 'free_trial',
   },
 );
+
+// Track funnel steps
+Telling.instance.trackFunnel(
+  'onboarding', 
+  'email_entered', 
+  step: 1,
+  properties: {'source': 'google_ads'},
+);
 ```
 
 ## 📚 Core Concepts
