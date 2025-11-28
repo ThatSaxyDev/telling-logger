@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.1.0 - 2024-11-28
+
+### Added
+- **Funnel Analysis**: Added comprehensive funnel tracking capabilities for analyzing user conversion flows.
+
 ## 1.0.15 - 2024-11-25
 
 ### Changed
