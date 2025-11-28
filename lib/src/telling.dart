@@ -18,8 +18,7 @@ class Telling {
   static Telling get instance => _instance;
 
   String? _apiKey;
-  final String _baseUrl =
-      'https://tellingserver-tttcjdx-thatsaxydev.globeapp.dev/api/v1/logs';
+  final String _baseUrl = 'https://tellingserver.globeapp.dev/api/v1/logs';
   bool _initialized = false;
   DeviceMetadata? _deviceMetadata;
   static const String _storageKey = 'telling_logs_buffer';
