@@ -34,7 +34,7 @@ Add `telling_logger` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  telling_logger: ^1.1.3
+  telling_logger: ^1.1.4
 ```
 
 Then install:
@@ -655,4 +655,4 @@ If Telling Logger helped you build better apps, please:
 
 **Made with 💙 by Kiishi**
 
-[Website](https://telling.dev) • [Twitter](https://twitter.com/kiishigod) • [GitHub](https://github.com/ThatSaxyDev)
+[Kiishi's Space](https://kiishi.space) • [Telling Dashboard](https://telling.cv) • [Twitter](https://twitter.com/kiishigod) • [GitHub](https://github.com/ThatSaxyDev)
