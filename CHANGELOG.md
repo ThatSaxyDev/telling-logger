@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.1.2 - 2024-11-29
+
+### Changed
+- **Funnel Analysis**: Added required `funnelName` and `stepName` parameter to `trackFunnel()` method.
+
 ## 1.1.1 - 2024-11-29
 
 ### Changed

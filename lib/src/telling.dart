@@ -198,9 +198,9 @@ class Telling {
   /// ```dart
   /// Telling.instance.trackFunnel('onboarding', 'email_entered', step: 1);
   /// ```
-  void trackFunnel(
-    String funnelName,
-    String stepName, {
+  void trackFunnel({
+    required String funnelName,
+    required String stepName,
     int? step,
     Map<String, dynamic>? properties,
   }) {

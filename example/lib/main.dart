@@ -683,13 +683,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _shippingController = TextEditingController();
   final _cardController = TextEditingController();
 
+  final screenFunnelName = 'checkout_flow';
+
   @override
   void initState() {
     super.initState();
     // Track Step 1: Cart Viewed
     Telling.instance.trackFunnel(
-      'checkout_flow',
-      'cart_viewed',
+      funnelName: screenFunnelName,
+      stepName: 'cart_viewed',
       step: 1,
       properties: {'item_count': 2, 'total_value': 49.99},
     );
@@ -700,8 +702,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       // Moving to Shipping
       setState(() => _currentStep = 1);
       Telling.instance.trackFunnel(
-        'checkout_flow',
-        'shipping_started',
+        funnelName: screenFunnelName,
+        stepName: 'shipping_started',
         step: 2,
       );
     } else if (_currentStep == 1) {
@@ -709,8 +711,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (_shippingController.text.isNotEmpty) {
         setState(() => _currentStep = 2);
         Telling.instance.trackFunnel(
-          'checkout_flow',
-          'shipping_completed',
+          funnelName: screenFunnelName,
+          stepName: 'shipping_completed',
           step: 3,
           properties: {'address_length': _shippingController.text.length},
         );
@@ -723,8 +725,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       // Completing Order
       if (_cardController.text.isNotEmpty) {
         Telling.instance.trackFunnel(
-          'checkout_flow',
-          'payment_completed',
+          funnelName: screenFunnelName,
+          stepName: 'payment_completed',
           step: 4,
           properties: {'payment_method': 'credit_card'},
         );

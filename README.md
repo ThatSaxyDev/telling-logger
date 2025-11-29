@@ -34,7 +34,7 @@ Add `telling_logger` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  telling_logger: ^1.1.1
+  telling_logger: ^1.1.2
 ```
 
 Then install:
@@ -63,16 +63,16 @@ import 'package:telling_logger/telling_logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Telling SDK
   await Telling.instance.init(
     'YOUR_API_KEY',
     enableDebugLogs: true, // Optional: Control debug logs (defaults to true in debug mode)
   );
-  
+
   // Enable automatic crash reporting
   Telling.instance.enableCrashReporting();
-  
+
   runApp(MyApp());
 }
 ```
@@ -122,8 +122,8 @@ Telling.instance.event(
 
 // Track funnel steps
 Telling.instance.trackFunnel(
-  'onboarding', 
-  'email_entered', 
+  funnelName: 'onboarding',
+  stepName: 'email_entered',
   step: 1,
   properties: {'source': 'google_ads'},
 );
@@ -135,30 +135,30 @@ Telling.instance.trackFunnel(
 
 Control the severity and visibility of your logs:
 
-| Level | Use Case | Severity |
-|-------|----------|----------|
-| `LogLevel.trace` | Extremely detailed debugging | 0 |
-| `LogLevel.debug` | Detailed diagnostic information | 1 |
-| `LogLevel.info` | General informational messages | 2 |
-| `LogLevel.warning` | Potentially harmful situations | 3 |
-| `LogLevel.error` | Runtime errors that allow continuation | 4 |
-| `LogLevel.fatal` | Critical errors causing termination | 5 |
+| Level              | Use Case                               | Severity |
+| ------------------ | -------------------------------------- | -------- |
+| `LogLevel.trace`   | Extremely detailed debugging           | 0        |
+| `LogLevel.debug`   | Detailed diagnostic information        | 1        |
+| `LogLevel.info`    | General informational messages         | 2        |
+| `LogLevel.warning` | Potentially harmful situations         | 3        |
+| `LogLevel.error`   | Runtime errors that allow continuation | 4        |
+| `LogLevel.fatal`   | Critical errors causing termination    | 5        |
 
 ### Log Types
 
 Categorize logs for better filtering and analytics:
 
-| Type | Purpose |
-|------|---------|
-| `LogType.general` | Standard application logs |
-| `LogType.analytics` | User behavior and event tracking |
-| `LogType.event` | Custom business events |
-| `LogType.performance` | Performance metrics and benchmarks |
-| `LogType.network` | API calls and network activity |
-| `LogType.security` | Security-related events |
-| `LogType.exception` | Handled exceptions |
-| `LogType.crash` | Application crashes and fatal errors |
-| `LogType.custom` | Custom log categories |
+| Type                  | Purpose                              |
+| --------------------- | ------------------------------------ |
+| `LogType.general`     | Standard application logs            |
+| `LogType.analytics`   | User behavior and event tracking     |
+| `LogType.event`       | Custom business events               |
+| `LogType.performance` | Performance metrics and benchmarks   |
+| `LogType.network`     | API calls and network activity       |
+| `LogType.security`    | Security-related events              |
+| `LogType.exception`   | Handled exceptions                   |
+| `LogType.crash`       | Application crashes and fatal errors |
+| `LogType.custom`      | Custom log categories                |
 
 ## 🎯 Advanced Features
 
@@ -208,7 +208,8 @@ Telling.instance.clearUserProperties(); // Clear all
 User properties are automatically included in all log events, enabling powerful segmentation in your analytics dashboard.
 
 ### Automatic Performance Tracking (Coming Soon)
-<!-- 
+
+<!--
 Enable automatic performance monitoring:
 
 ```dart
@@ -255,6 +256,7 @@ MaterialApp.router(
 ```
 
 Screen views are automatically logged with:
+
 - Screen name
 - Previous screen
 - Time spent on previous screen
@@ -304,12 +306,12 @@ CriticalAlert().nowTelling(
 ```
 
 **Parameters:**
+
 - `name` – Custom name (defaults to widget's runtimeType)
 - `type` – Log type (defaults to `LogType.analytics`)
 - `level` – Log level (defaults to `LogLevel.info`)
 - `metadata` – Additional context data
 - `trackOnce` – Track only first appearance (defaults to `true`)
-
 
 ### Session Management
 
@@ -336,20 +338,21 @@ Enable automatic crash capture for both Flutter and platform errors:
 ```dart
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   await Telling.instance.init('YOUR_API_KEY');
-  
+
   // Captures:
   // - Flutter framework errors (FlutterError.onError)
   // - Platform dispatcher errors (PlatformDispatcher.onError)
   // - Render issues (marked as warnings)
   Telling.instance.enableCrashReporting();
-  
+
   runApp(MyApp());
 }
 ```
 
 **Crash Intelligence:**
+
 - Render/layout issues are logged as `warnings`
 - Actual crashes are logged as `fatal` errors
 - Full stack traces included
@@ -376,20 +379,20 @@ await Telling.instance.init(
 ```dart
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   const isProduction = bool.fromEnvironment('dart.vm.product');
-  
+
   await Telling.instance.init(
     isProduction ? 'PROD_API_KEY' : 'DEV_API_KEY',
   );
-  
+
   runApp(MyApp());
 }
 ```
 
 ### Debug Logs Control
 
-```dart
+````dart
 // Disable debug logs even in debug mode
 await Telling.instance.init(
   'YOUR_API_KEY',
@@ -414,14 +417,14 @@ await Telling.instance.init(
 ```dart
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize BEFORE runApp
   await Telling.instance.init('API_KEY');
   Telling.instance.enableCrashReporting();
-  
+
   runApp(MyApp());
 }
-```
+````
 
 ### 2. Use Appropriate Log Levels
 
@@ -495,19 +498,20 @@ Telling.instance.event('login', properties: {
 });
 ```
 
-
 ### Common Errors
 
 **"Telling SDK not initialized"**
+
 - Call `await Telling.instance.init()` before using the SDK
 
 **"Invalid API Key" (403)**
+
 - Verify your API key is correct
 - Check backend is running and accessible
 
 **"Logs being dropped"**
-- Reduce log volume or increase limits
 
+- Reduce log volume or increase limits
 
 ## 📄 License
 
@@ -523,6 +527,7 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 ## 🌟 Show Your Support
 
 If Telling Logger helped you build better apps, please:
+
 - ⭐ Star this repo
 - 🐦 Share on Twitter
 - 📝 Write a blog post
