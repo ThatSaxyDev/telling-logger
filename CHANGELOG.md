@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.1.3 - 2024-11-29
+
+### Added
+- **Documentation**: Comprehensive funnel tracking guide in README with examples and best practices.
+
 ## 1.1.2 - 2024-11-29
 
 ### Changed
