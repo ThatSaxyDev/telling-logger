@@ -315,6 +315,122 @@ CriticalAlert().nowTelling(
 - `metadata` – Additional context data
 - `trackOnce` – Track only first appearance (defaults to `true`)
 
+### Funnel Tracking
+
+Track user journeys through multi-step flows to identify drop-off points and optimize conversion rates.
+
+> [!CAUTION]
+> **Critical: Set User Context First**
+> 
+> Always call `Telling.instance.setUser()` **BEFORE** tracking funnel steps. If you call `setUser()` mid-funnel, the backend will treat events before and after as different users, breaking your conversion tracking.
+
+#### Basic Usage
+
+```dart
+void trackFunnel({
+  required String funnelName,
+  required String stepName,
+  int? step,
+  Map<String, dynamic>? properties,
+});
+```
+
+**Parameters:**
+- `funnelName` – Unique identifier for the entire flow (must be consistent across all steps)
+- `stepName` – Descriptive name for this specific step
+- `step` – Optional but recommended: Sequential step number (1, 2, 3...)
+- `properties` – Optional additional metadata for this step
+
+#### Example: User Onboarding
+
+```dart
+// Set user context first (critical!)
+final tempUserId = 'anon_${DateTime.now().millisecondsSinceEpoch}';
+Telling.instance.setUser(userId: tempUserId);
+
+// Step 1: User lands on welcome screen
+Telling.instance.trackFunnel(
+  funnelName: 'user_onboarding',
+  stepName: 'welcome_viewed',
+  step: 1,
+);
+
+// Step 2: User clicks "Get Started"
+Telling.instance.trackFunnel(
+  funnelName: 'user_onboarding',
+  stepName: 'get_started_clicked',
+  step: 2,
+);
+
+// Step 3: User submits registration
+Telling.instance.trackFunnel(
+  funnelName: 'user_onboarding',
+  stepName: 'registration_submitted',
+  step: 3,
+  properties: {'method': 'email'},
+);
+
+// Step 4: User completes profile (conversion!)
+Telling.instance.trackFunnel(
+  funnelName: 'user_onboarding',
+  stepName: 'profile_completed',
+  step: 4,
+);
+```
+
+#### Example: E-Commerce Checkout
+
+```dart
+final checkoutFunnel = 'checkout_flow';
+
+// Step 1: Cart viewed
+Telling.instance.trackFunnel(
+  funnelName: checkoutFunnel,
+  stepName: 'cart_viewed',
+  step: 1,
+  properties: {'item_count': 2, 'total_value': 49.99},
+);
+
+// Step 2: Shipping started
+Telling.instance.trackFunnel(
+  funnelName: checkoutFunnel,
+  stepName: 'shipping_started',
+  step: 2,
+);
+
+// Step 3: Shipping completed
+Telling.instance.trackFunnel(
+  funnelName: checkoutFunnel,
+  stepName: 'shipping_completed',
+  step: 3,
+  properties: {'address_length': 45},
+);
+
+// Step 4: Payment successful (conversion!)
+Telling.instance.trackFunnel(
+  funnelName: checkoutFunnel,
+  stepName: 'payment_completed',
+  step: 4,
+  properties: {'payment_method': 'credit_card'},
+);
+```
+
+#### Best Practices
+
+1. **Consistent Naming**: Use the exact same `funnelName` across all steps (e.g., `'checkout_flow'`, not `'checkout'` then `'checkout_flow'`)
+2. **Sequential Steps**: Always provide `step` numbers (1, 2, 3...) for reliable analysis
+3. **Descriptive Step Names**: Use action-oriented names (`'payment_completed'` not `'step4'`)
+4. **Enrich with Properties**: Add context that explains drop-offs (`{'cart_value': 99.99, 'payment_method': 'paypal'}`)
+5. **Track Start & End**: Capture the first step to establish baseline conversion rates
+6. **Anonymous Users**: Generate a temporary user ID for anonymous flows:
+   ```dart
+   final tempUserId = 'anon_${uuid.v4()}';
+   Telling.instance.setUser(userId: tempUserId);
+   ```
+
+> [!TIP]
+> For detailed funnel tracking implementation patterns and troubleshooting, see the [Funnel Tracking Guide](./doc/FUNNEL_TRACKING_GUIDE.md).
+
 ### Session Management
 
 Sessions are automatically managed based on app lifecycle:
