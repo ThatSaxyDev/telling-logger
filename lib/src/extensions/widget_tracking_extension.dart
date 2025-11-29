@@ -90,7 +90,7 @@ class _TellingWrapperState extends State<_TellingWrapper> {
       // Build the complete metadata
       final completeMetadata = <String, dynamic>{
         'view_name': widget.name,
-        'timestamp': DateTime.now().toIso8601String(),
+        'timestamp': DateTime.now().toUtc().toIso8601String(),
         ...?widget.metadata,
       };
 

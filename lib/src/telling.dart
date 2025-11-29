@@ -395,7 +395,7 @@ class Telling {
       type: type,
       level: level,
       message: message,
-      timestamp: DateTime.now(),
+      timestamp: DateTime.now().toUtc(),
       stackTrace:
           stackTrace?.toString() ??
           (error is Error ? error.stackTrace?.toString() : null),
