@@ -120,7 +120,9 @@ Telling.instance.event(
   },
 );
 
-// Track funnel steps
+// Track funnel steps (IMPORTANT: call setUser first!)
+// Telling.instance.setUser(userId: 'user123'); // Must be called before funnel tracking
+
 Telling.instance.trackFunnel(
   funnelName: 'onboarding',
   stepName: 'email_entered',

@@ -2,6 +2,21 @@
 
 This guide outlines the best practices for implementing funnel tracking in your Flutter application using the `telling_logger` package.
 
+> [!CAUTION]
+> **Critical: Set User Context Before Funnel Tracking**
+> 
+> Always call `Telling.instance.setUser()` **BEFORE** tracking any funnel steps. If you call `setUser()` in the middle of a funnel, the backend will treat events before and after as belonging to different users, resulting in incomplete funnels and inaccurate conversion metrics.
+>
+> For anonymous users, generate a temporary user ID before starting the funnel:
+> ```dart
+> // Generate once at app start for anonymous users
+> final tempUserId = 'anon_${uuid.v4()}';
+> Telling.instance.setUser(userId: tempUserId);
+> 
+> // Now safe to track funnels
+> Telling.instance.trackFunnel(...);
+> ```
+
 ## What is Funnel Tracking?
 
 Funnel tracking allows you to monitor a user's journey through a specific series of steps towards a goal (conversion). By tracking each step, you can identify where users drop off and optimize your application's flow.
@@ -58,6 +73,21 @@ Use the `properties` map to add context that might explain drop-offs.
 
 ### 5. Track the "Start" and "End"
 Ensure you track the very first interaction as Step 1. This gives you the baseline to calculate conversion rates. Similarly, track the final success state as the last step.
+
+### 6. Set User Context First
+**Always call `setUser()` before starting a funnel.** The backend groups funnel events by `userId`, so if you call `setUser()` mid-funnel, your conversion tracking will break. 
+
+For anonymous users who haven't logged in yet:
+```dart
+// At app initialization
+final tempUserId = 'anon_${DateTime.now().millisecondsSinceEpoch}';
+Telling.instance.setUser(userId: tempUserId);
+```
+
+When the user actually logs in, you can update:
+```dart
+Telling.instance.setUser(userId: 'real_user_123', userName: 'John', userEmail: 'john@example.com');
+```
 
 ---
 
@@ -137,6 +167,7 @@ Telling.instance.trackFunnel(
 
 ## Troubleshooting
 
+- **Incomplete Funnels / Low Conversion**: If your funnels show unexpectedly low completion rates, check if `setUser()` is being called mid-funnel. This causes the backend to see events before and after as different users. **Solution:** Always call `setUser()` before the first funnel step.
 - **Missing Steps**: Ensure `trackFunnel` is called *after* the action is confirmed (e.g., inside the `onPressed` callback or after form validation).
 - **Mixed Funnels**: Double-check that `funnelName` is identical across all steps. A typo like `'checkout'` vs `'checkout_flow'` will break the analysis.
 - **Rate Limiting**: The SDK has a rate limiter. If you track steps in extremely rapid succession (milliseconds apart), some might be dropped. For normal user flows, this is rarely an issue.

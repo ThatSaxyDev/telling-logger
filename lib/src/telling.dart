@@ -18,7 +18,8 @@ class Telling {
   static Telling get instance => _instance;
 
   String? _apiKey;
-  final String _baseUrl = 'https://tellingserver.globeapp.dev/api/v1/logs';
+  final String _baseUrl =
+      'https://tellingserver-otsis3z-thatsaxydev.globeapp.dev/api/v1/logs';
   bool _initialized = false;
   DeviceMetadata? _deviceMetadata;
   static const String _storageKey = 'telling_logs_buffer';
@@ -194,9 +195,21 @@ class Telling {
 
   /// Track a funnel step
   ///
+  /// **IMPORTANT:** For accurate funnel analysis, call `setUser()` BEFORE tracking
+  /// any funnel steps. If you call `setUser()` mid-funnel, the backend will see
+  /// steps before and after as belonging to different users, breaking the funnel.
+  ///
   /// Usage:
   /// ```dart
-  /// Telling.instance.trackFunnel('onboarding', 'email_entered', step: 1);
+  /// // 1. Set user first (even for anonymous users, use a temp ID)
+  /// Telling.instance.setUser(userId: 'user123');
+  ///
+  /// // 2. Then track funnel steps
+  /// Telling.instance.trackFunnel(
+  ///   funnelName: 'onboarding',
+  ///   stepName: 'email_entered',
+  ///   step: 1,
+  /// );
   /// ```
   void trackFunnel({
     required String funnelName,
