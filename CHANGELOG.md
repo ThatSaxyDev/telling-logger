@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.1.1 - 2024-11-29
+
+### Changed
+- **Timestamps**: Updated to use UTC time consistently across all logging operations.
+
 ## 1.1.0 - 2024-11-28
 
 ### Added
