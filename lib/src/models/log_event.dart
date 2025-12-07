@@ -155,4 +155,34 @@ class LogEvent {
       if (sessionId != null) 'sessionId': sessionId,
     };
   }
+
+  /// Deserialize from JSON (for loading persisted logs)
+  factory LogEvent.fromJson(Map<String, dynamic> json) {
+    return LogEvent(
+      id: json['id'] as String?,
+      type: LogType.values.firstWhere(
+        (e) => e.toString().split('.').last == json['type'],
+        orElse: () => LogType.general,
+      ),
+      level: LogLevel.values.firstWhere(
+        (e) => e.toString().split('.').last == json['level'],
+        orElse: () => LogLevel.info,
+      ),
+      message: json['message'] as String? ?? '',
+      timestamp: json['timestamp'] != null
+          ? DateTime.parse(json['timestamp'] as String)
+          : DateTime.now().toUtc(),
+      stackTrace: json['stackTrace'] as String?,
+      metadata: json['metadata'] != null
+          ? Map<String, dynamic>.from(json['metadata'] as Map)
+          : null,
+      deviceMetadata: json['device'] != null
+          ? DeviceMetadata.fromJson(Map<String, dynamic>.from(json['device'] as Map))
+          : null,
+      userId: json['userId'] as String?,
+      userName: json['userName'] as String?,
+      userEmail: json['userEmail'] as String?,
+      sessionId: json['sessionId'] as String?,
+    );
+  }
 }

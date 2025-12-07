@@ -24,16 +24,15 @@ class LogRateLimiter {
   int _logsThisSecond = 0;
   DateTime? _currentSecond;
 
-  /// Generate a hash for a log event based on message, level, stack trace, AND metadata
+  /// Generate a hash for a log event (must match server-side hash)
   String _hashLog(LogEvent event) {
     final parts = [
       event.message,
       event.level.toString(),
       event.stackTrace ?? '',
-      event.metadata
-          .toString(), // Include metadata in hash to differentiate sessions
+      event.metadata?.toString() ?? '',
     ];
-    return parts.join('|').hashCode.toString();
+    return parts.join('_').hashCode.toString();
   }
 
   /// Get the throttle key for a log type

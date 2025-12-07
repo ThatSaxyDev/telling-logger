@@ -509,9 +509,9 @@ class Telling {
         if (_enableDebugLogs) {
           final savings = ((1 - body.length / jsonBytes.length) * 100)
               .toStringAsFixed(0);
-          print(
-            'Telling: Compressed payload ${jsonBytes.length} → ${body.length} bytes ($savings% reduction)',
-          );
+          // print(
+          //   'Telling: Compressed payload ${jsonBytes.length} → ${body.length} bytes ($savings% reduction)',
+          // );
         }
       } else {
         body = jsonBytes;
@@ -626,27 +626,8 @@ class Telling {
         }
         for (var logString in logsJson) {
           try {
-            final map = jsonDecode(logString);
-            // Reconstruct LogEvent (simplified for now, assuming structure matches)
-            // Note: You might need a fromJson method in LogEvent
-            final event = LogEvent(
-              type: LogType.values.firstWhere(
-                (e) => e.toString().split('.').last == map['type'],
-                orElse: () => LogType.general,
-              ),
-              level: LogLevel.values.firstWhere(
-                (e) => e.toString().split('.').last == map['level'],
-                orElse: () => LogLevel.info,
-              ),
-              message: map['message'],
-              timestamp: DateTime.parse(map['timestamp']),
-              stackTrace: map['stackTrace'],
-              metadata: map['metadata'],
-              // deviceMetadata is usually re-attached or stored in the log.
-              // For simplicity, we'll assume it's in the log or we attach current.
-              // If stored in log:
-              // deviceMetadata: map['device'] != null ? DeviceMetadata.fromJson(map['device']) : null,
-            );
+            final map = jsonDecode(logString) as Map<String, dynamic>;
+            final event = LogEvent.fromJson(map);
             _buffer.add(event);
           } catch (e) {
             if (_enableDebugLogs) {

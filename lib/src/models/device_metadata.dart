@@ -25,5 +25,16 @@ class DeviceMetadata {
       if (appBuildNumber != null) 'appBuildNumber': appBuildNumber,
     };
   }
+
+  /// Deserialize from JSON (for loading persisted logs)
+  factory DeviceMetadata.fromJson(Map<String, dynamic> json) {
+    return DeviceMetadata(
+      platform: json['platform'] as String?,
+      osVersion: json['osVersion'] as String?,
+      deviceModel: json['deviceModel'] as String?,
+      appVersion: json['appVersion'] as String?,
+      appBuildNumber: json['appBuildNumber'] as String?,
+    );
+  }
 }
 
