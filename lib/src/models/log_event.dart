@@ -114,6 +114,9 @@ class LogEvent {
   final String? userEmail;
   final String? sessionId;
 
+  // Counter to ensure uniqueness within same microsecond
+  static int _counter = 0;
+
   LogEvent({
     String? id,
     this.type = LogType.general,
@@ -127,10 +130,14 @@ class LogEvent {
     this.userName,
     this.userEmail,
     this.sessionId,
-  }) : id =
-           id ??
-           DateTime.now().millisecondsSinceEpoch
-               .toString(); // Simple ID for now
+  }) : id = id ?? _generateUniqueId();
+
+  /// Generates unique ID: microseconds + counter (resets at 9999)
+  static String _generateUniqueId() {
+    final timestamp = DateTime.now().microsecondsSinceEpoch;
+    _counter = (_counter + 1) % 10000;
+    return '${timestamp}_$_counter';
+  }
 
   Map<String, dynamic> toJson() {
     return {
