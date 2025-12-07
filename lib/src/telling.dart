@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show gzip;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
@@ -412,10 +413,8 @@ class Telling {
       stackTrace:
           stackTrace?.toString() ??
           (error is Error ? error.stackTrace?.toString() : null),
-      metadata: {
-        ...?metadata,
-        if (_userProperties.isNotEmpty) '_user_properties': _userProperties,
-      },
+      metadata:
+          metadata, // User properties are sent separately via setUserProperty logs
       deviceMetadata: _deviceMetadata,
       userId: _userId,
       userName: _userName,
@@ -491,10 +490,37 @@ class Telling {
       //   print('Telling: Sending ${eventsToSend.length} logs to $_baseUrl');
       // }
 
+      final jsonPayload = jsonEncode(
+        eventsToSend.map((e) => e.toJson()).toList(),
+      );
+      final jsonBytes = utf8.encode(jsonPayload);
+
+      // Use gzip compression for payloads > 1KB to reduce network overhead
+      final bool useCompression = jsonBytes.length > 1024;
+      final List<int> body;
+      final Map<String, String> headers = {
+        'Content-Type': 'application/json',
+        'x-api-key': _apiKey!,
+      };
+
+      if (useCompression) {
+        body = gzip.encode(jsonBytes);
+        headers['Content-Encoding'] = 'gzip';
+        if (_enableDebugLogs) {
+          final savings = ((1 - body.length / jsonBytes.length) * 100)
+              .toStringAsFixed(0);
+          print(
+            'Telling: Compressed payload ${jsonBytes.length} → ${body.length} bytes ($savings% reduction)',
+          );
+        }
+      } else {
+        body = jsonBytes;
+      }
+
       final response = await http.post(
         Uri.parse(_baseUrl),
-        headers: {'Content-Type': 'application/json', 'x-api-key': _apiKey!},
-        body: jsonEncode(eventsToSend.map((e) => e.toJson()).toList()),
+        headers: headers,
+        body: body,
       );
 
       if (response.statusCode == 200) {
