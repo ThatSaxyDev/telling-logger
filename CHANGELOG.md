@@ -2,37 +2,51 @@
 
 All notable changes to this project will be documented in this file.
 
-## 1.1.4 - 2024-11-30
+## 1.1.5 - 2025-12-07
+
+### Improved
+- **LogType Simplification**: Reduced from 9 overlapping types to 4 clear types:
+  - `general` (absorbs: log, error, network, security, custom)
+  - `analytics` (absorbs: event)
+  - `crash` (absorbs: exception)
+  - `performance`
+- **Backward Compatibility**: Old log types are automatically mapped to new types via `LogTypeExtensions.fromString()`.
+
+### Performance
+- **Network Efficiency**: Added GZIP compression for log payloads > 1KB (~60-70% size reduction).
+- Estimated **~85% reduction** in log payload size for typical batches.
+
+## 1.1.4 - 2025-11-30
 
 ### Added
 - **Documentation**: Comprehensive funnel tracking guide in README with examples and best practices.
 
-## 1.1.3 - 2024-11-29
+## 1.1.3 - 2025-11-29
 
 ### Added
 - **Documentation**: Comprehensive funnel tracking guide in README with examples and best practices.
 
-## 1.1.2 - 2024-11-29
+## 1.1.2 - 2025-11-29
 
 ### Changed
 - **Funnel Analysis**: Added required `funnelName` and `stepName` parameter to `trackFunnel()` method.
 
-## 1.1.1 - 2024-11-29
+## 1.1.1 - 2025-11-29
 
 ### Changed
 - **Timestamps**: Updated to use UTC time consistently across all logging operations.
 
-## 1.1.0 - 2024-11-28
+## 1.1.0 - 2025-11-28
 
 ### Added
 - **Funnel Analysis**: Added comprehensive funnel tracking capabilities for analyzing user conversion flows.
 
-## 1.0.15 - 2024-11-25
+## 1.0.15 - 2025-11-25
 
 ### Changed
 - **Documentation**: Updated dashboard URL in README.
 
-## 1.0.14 - 2024-11-25
+## 1.0.14 - 2025-11-25
 
 ### Added
 - **Debug Logs Control**: Added optional `enableDebugLogs` parameter to `init()` method.
@@ -43,7 +57,7 @@ All notable changes to this project will be documented in this file.
 ### Improved
 - **Developer Experience**: Better control over console output during development.
 
-## 1.0.13 - 2024-11-25
+## 1.0.13 - 2025-11-25
 
 ### Added
 - **Debug Logs Control**: Added optional `enableDebugLogs` parameter to `init()` method.
@@ -54,12 +68,12 @@ All notable changes to this project will be documented in this file.
 ### Improved
 - **Developer Experience**: Better control over console output during development.
 
-## 1.0.12 - 2024-11-25
+## 1.0.12 - 2025-11-25
 
 ### Improved
 - **Developer Experience**: Better control over console output during development.
 
-## 1.0.11 - 2024-11-25
+## 1.0.11 - 2025-11-25
 
 ### Added
 - **Debug Logs Control**: Added optional `enableDebugLogs` parameter to `init()` method.
@@ -70,7 +84,7 @@ All notable changes to this project will be documented in this file.
 ### Improved
 - **Developer Experience**: Better control over console output during development.
 
-## 1.0.10 - 2024-11-25
+## 1.0.10 - 2025-11-25
 
 ### Added
 - **Debug Logs Control**: Added optional `enableDebugLogs` parameter to `init()` method.
@@ -81,7 +95,7 @@ All notable changes to this project will be documented in this file.
 ### Improved
 - **Developer Experience**: Better control over console output during development.
 
-## 1.0.9 - 2024-11-25
+## 1.0.9 - 2025-11-25
 
 ### Added
 - **Example**: Added initial Flutter example project with platform configurations.
@@ -93,41 +107,41 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - **API**: Removed `rate_limiter` export to simplify public API.
 
-## 1.0.8 - 2024-11-24
+## 1.0.8 - 2025-11-24
 
 ### Improved
 - **General**: Minor fixes and improvements.
 
-## 1.0.7 - 2024-11-24
+## 1.0.7 - 2025-11-24
 
 ### Fixed
 - **Documentation**: Updated README installation instructions to reflect the correct version.
 
-## 1.0.6 - 2024-11-24
+## 1.0.6 - 2025-11-24
 
 ### Improved
 - **Error Logging**: Sanitized network error messages to be less revealing and more user-friendly.
 
-## 1.0.5 - 2024-11-24
+## 1.0.5 - 2025-11-24
 
 ### Changed
 - **Internal**: Updated backend API URL to point to the new server instance.
 
-## 1.0.4 - 2024-11-24
+## 1.0.4 - 2025-11-24
 
 ### Improved
 - **Documentation**: Enhanced README with improved structure and clarity
   - Refined feature descriptions and usage examples
   - Better organization of sections
 
-## 1.0.3 - 2024-11-23
+## 1.0.3 - 2025-11-23
 
 ### Improved
 - **Documentation**: Added "Get Your API Key" section to README
   - Clear instructions on how to obtain API keys from the dashboard
   - Added direct link to the Telling Dashboard
 
-## 1.0.2 - 2024-11-23
+## 1.0.2 - 2025-11-23
 
 ### Improved
 - **Streamlined Documentation**: Simplified README for better clarity
@@ -135,7 +149,7 @@ All notable changes to this project will be documented in this file.
   - Cleaner, more concise documentation
 - **Updated Contact Information**: Updated support email and author details
 
-## 1.0.1 - 2024-11-23
+## 1.0.1 - 2025-11-23
 
 ### Changed
 - **Production-Safe Logging**: All debug `print` statements now wrapped with `kDebugMode` checks
@@ -152,7 +166,7 @@ All notable changes to this project will be documented in this file.
   - Included best practices and troubleshooting sections
   - Added performance benchmarks and optimization details
 
-## 1.0.0 - 2024-11-23
+## 1.0.0 - 2025-11-23
 
 ### Initial Release
 
