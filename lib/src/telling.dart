@@ -194,26 +194,30 @@ class Telling {
   /// try {
   ///   await riskyOperation();
   /// } catch (e, stackTrace) {
-  ///   Telling.instance.captureException(e, stackTrace, context: 'checkout_flow');
+  ///   Telling.instance.captureException(
+  ///     error: e,
+  ///     stackTrace: stackTrace,
+  ///     context: 'checkout_flow',
+  ///   );
   ///   // Handle the error gracefully...
   /// }
   /// ```
-  void captureException(
-    Object exception, [
+  void captureException({
+    required Object error,
     StackTrace? stackTrace,
     String? context,
     Map<String, dynamic>? metadata,
-  ]) {
+  }) {
     final enrichedMetadata = <String, dynamic>{
-      'exception_type': exception.runtimeType.toString(),
+      'exception_type': error.runtimeType.toString(),
       if (context != null) 'context': context,
       ...?metadata,
     };
 
     log(
-      exception.toString(),
+      error.toString(),
       level: LogLevel.error,
-      error: exception,
+      error: error,
       stackTrace: stackTrace,
       metadata: enrichedMetadata,
       type: LogType.crash,
@@ -331,7 +335,7 @@ class Telling {
   }
 
   /// Set a single user property
-  void setUserProperty(String key, dynamic value) {
+  void setUserProperty({required String key, required dynamic value}) {
     _userProperties[key] = value;
 
     // Log property change

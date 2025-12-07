@@ -47,7 +47,12 @@ mixin TellingTryCatch {
       return result;
     } catch (e, stackTrace) {
       // Report to Telling
-      Telling.instance.captureException(e, stackTrace, context, metadata);
+      Telling.instance.captureException(
+        error: e,
+        stackTrace: stackTrace,
+        context: context,
+        metadata: metadata,
+      );
 
       // Call custom error handler if provided
       onError?.call(e, stackTrace);
@@ -84,7 +89,12 @@ mixin TellingTryCatch {
       onSuccess?.call();
     } catch (e, stackTrace) {
       // Report to Telling
-      Telling.instance.captureException(e, stackTrace, context, metadata);
+      Telling.instance.captureException(
+        error: e,
+        stackTrace: stackTrace,
+        context: context,
+        metadata: metadata,
+      );
 
       // Call custom error handler if provided
       onError?.call(e, stackTrace);
@@ -116,7 +126,12 @@ mixin TellingTryCatch {
       return func();
     } catch (e, stackTrace) {
       // Report to Telling
-      Telling.instance.captureException(e, stackTrace, context, metadata);
+      Telling.instance.captureException(
+        error: e,
+        stackTrace: stackTrace,
+        context: context,
+        metadata: metadata,
+      );
 
       // Call custom error handler if provided
       onError?.call(e, stackTrace);
