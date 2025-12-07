@@ -184,6 +184,42 @@ class Telling {
     }
   }
 
+  /// Capture and report an exception
+  ///
+  /// Use this to report exceptions that you've caught in try-catch blocks.
+  /// This ensures handled exceptions are still tracked for debugging.
+  ///
+  /// Example:
+  /// ```dart
+  /// try {
+  ///   await riskyOperation();
+  /// } catch (e, stackTrace) {
+  ///   Telling.instance.captureException(e, stackTrace, context: 'checkout_flow');
+  ///   // Handle the error gracefully...
+  /// }
+  /// ```
+  void captureException(
+    Object exception, [
+    StackTrace? stackTrace,
+    String? context,
+    Map<String, dynamic>? metadata,
+  ]) {
+    final enrichedMetadata = <String, dynamic>{
+      'exception_type': exception.runtimeType.toString(),
+      if (context != null) 'context': context,
+      ...?metadata,
+    };
+
+    log(
+      exception.toString(),
+      level: LogLevel.error,
+      error: exception,
+      stackTrace: stackTrace,
+      metadata: enrichedMetadata,
+      type: LogType.crash,
+    );
+  }
+
   /// Track an analytics event
   void event(String name, {Map<String, dynamic>? properties}) {
     log(
