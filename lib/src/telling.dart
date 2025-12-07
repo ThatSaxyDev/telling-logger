@@ -58,8 +58,13 @@ class Telling {
 
   // Retry tracking for failed flushes
   int _consecutiveFailures = 0;
-  static const int _maxConsecutiveFailures = 2;
+  static const int _maxConsecutiveFailures = 5;
   bool _permanentFailure = false;
+  DateTime? _nextRetryTime;
+
+  // Buffer limits
+  static const int _maxBufferSize = 500;
+  static const int _bufferTrimSize = 400; // Trim to this when max reached
 
   /// Initialize the Telling SDK
   Future<void> init(
@@ -470,6 +475,15 @@ class Telling {
       return; // Drop rate-limited log
     }
 
+    // Enforce buffer size limit - drop oldest logs if full
+    if (_buffer.length >= _maxBufferSize) {
+      final dropCount = _buffer.length - _bufferTrimSize;
+      _buffer.removeRange(0, dropCount);
+      if (_enableDebugLogs) {
+        print('Telling: Buffer full, dropped $dropCount oldest logs');
+      }
+    }
+
     _buffer.add(event);
     _rateLimiter.markLogSent(event);
     _persistLogs(); // Save to disk immediately
@@ -500,6 +514,15 @@ class Telling {
         print(
           'Telling: Skipping flush due to permanent failure (check API key)',
         );
+      }
+      return;
+    }
+
+    // Check if we should wait before retrying (exponential backoff)
+    if (_nextRetryTime != null && DateTime.now().isBefore(_nextRetryTime!)) {
+      if (_enableDebugLogs) {
+        final waitSeconds = _nextRetryTime!.difference(DateTime.now()).inSeconds;
+        print('Telling: Waiting ${waitSeconds}s before retry (backoff)');
       }
       return;
     }
@@ -564,8 +587,9 @@ class Telling {
       );
 
       if (response.statusCode == 200) {
-        // Success! Reset failure counter and clear from persistence
+        // Success! Reset failure counter and backoff
         _consecutiveFailures = 0;
+        _nextRetryTime = null;
         _persistLogs();
       } else if (response.statusCode == 403) {
         // Forbidden - likely invalid API key
@@ -601,8 +625,9 @@ class Telling {
           _persistLogs();
         }
       } else {
-        // Other errors - retry with backoff
+        // Other errors - retry with exponential backoff
         _consecutiveFailures++;
+        _setBackoff();
 
         if (_consecutiveFailures >= _maxConsecutiveFailures) {
           if (_enableDebugLogs) {
@@ -610,11 +635,14 @@ class Telling {
               'Telling: Giving up after $_maxConsecutiveFailures failures. Status: ${response.statusCode}',
             );
           }
-          _buffer.clear(); // Stop retrying
+          _consecutiveFailures = 0;
+          _nextRetryTime = null;
+          // Keep logs in buffer for next app session
         } else {
           if (_enableDebugLogs) {
+            final backoffSeconds = _nextRetryTime!.difference(DateTime.now()).inSeconds;
             print(
-              'Telling: Failed to send logs (${response.statusCode}). Will retry ($_consecutiveFailures/$_maxConsecutiveFailures)',
+              'Telling: Failed (${response.statusCode}). Retry $_consecutiveFailures/$_maxConsecutiveFailures in ${backoffSeconds}s',
             );
           }
           _buffer.addAll(eventsToSend); // Retry
@@ -623,24 +651,34 @@ class Telling {
       }
     } catch (e) {
       _consecutiveFailures++;
+      _setBackoff();
 
       if (_consecutiveFailures >= _maxConsecutiveFailures) {
         if (_enableDebugLogs) {
           print(
-            'Telling: Connection issue, giving up after $_consecutiveFailures attempts. Logs buffered.',
+            'Telling: Connection issue, giving up after $_consecutiveFailures attempts. Logs persisted.',
           );
         }
-        _buffer.clear(); // Stop retrying
+        _consecutiveFailures = 0;
+        _nextRetryTime = null;
+        // Keep logs in buffer for next app session
       } else {
         if (_enableDebugLogs) {
+          final backoffSeconds = _nextRetryTime!.difference(DateTime.now()).inSeconds;
           print(
-            'Telling: Connection issue, will retry ($_consecutiveFailures/$_maxConsecutiveFailures)...',
+            'Telling: Connection issue. Retry $_consecutiveFailures/$_maxConsecutiveFailures in ${backoffSeconds}s',
           );
         }
         _buffer.addAll(eventsToSend); // Retry
       }
       _persistLogs();
     }
+  }
+
+  /// Calculate exponential backoff: 5s, 10s, 20s, 40s, 80s
+  void _setBackoff() {
+    final backoffSeconds = 5 * (1 << (_consecutiveFailures - 1)); // 5, 10, 20, 40, 80
+    _nextRetryTime = DateTime.now().add(Duration(seconds: backoffSeconds));
   }
 
   Future<void> _persistLogs() async {
