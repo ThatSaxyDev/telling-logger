@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.2.1 - 2025-12-07
+
+### Fixed
+- **Documentation**: Updated README to reflect simplified LogType enum (4 types: general, analytics, crash, performance).
+
 ## 1.2.0 - 2025-12-07
 
 ### Added

@@ -34,7 +34,7 @@ Add `telling_logger` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  telling_logger: ^1.2.0
+  telling_logger: ^1.2.1
 ```
 
 Then install:
@@ -150,17 +150,12 @@ Control the severity and visibility of your logs:
 
 Categorize logs for better filtering and analytics:
 
-| Type                  | Purpose                              |
-| --------------------- | ------------------------------------ |
-| `LogType.general`     | Standard application logs            |
-| `LogType.analytics`   | User behavior and event tracking     |
-| `LogType.event`       | Custom business events               |
-| `LogType.performance` | Performance metrics and benchmarks   |
-| `LogType.network`     | API calls and network activity       |
-| `LogType.security`    | Security-related events              |
-| `LogType.exception`   | Handled exceptions                   |
-| `LogType.crash`       | Application crashes and fatal errors |
-| `LogType.custom`      | Custom log categories                |
+| Type                  | Purpose                                        |
+| --------------------- | ---------------------------------------------- |
+| `LogType.general`     | Standard application logs, debug, operational  |
+| `LogType.analytics`   | User events, funnels, screen views, tracking   |
+| `LogType.crash`       | Errors, exceptions, and crashes                |
+| `LogType.performance` | Performance metrics and benchmarks             |
 
 ## 🎯 Advanced Features
 
