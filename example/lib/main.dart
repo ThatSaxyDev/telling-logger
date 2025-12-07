@@ -7,7 +7,7 @@ void main() async {
   // Initialize Telling SDK
   // Replace 'YOUR_API_KEY' with a valid key from your dashboard
   await Telling.instance.init(
-    '1ng7rja2M0CAzzNZQweDeePrJKxLgnwRZEIiVqfL07E=',
+    'API_KEY_HERE',
     enableDebugLogs: true,
   );
 
@@ -210,12 +210,10 @@ class HomeScreen extends StatelessWidget {
                     try {
                       throw Exception('Test Exception');
                     } catch (e, stack) {
-                      Telling.instance.log(
-                        'Error occurred',
-                        level: LogLevel.error,
-                        error: e,
-                        stackTrace: stack,
-                      );
+                      Telling.instance.captureException(
+                          error: e,
+                          stackTrace: stack,
+                          context: 'Test Exception');
                     }
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Logged Error')),
@@ -258,8 +256,8 @@ class HomeScreen extends StatelessWidget {
               children: [
                 ElevatedButton.icon(
                   onPressed: () {
-                    Telling.instance
-                        .setUserProperty('subscription_tier', 'premium');
+                    Telling.instance.setUserProperty(
+                        key: 'subscription_tier', value: 'premium');
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                           content: Text('✅ Set: subscription_tier = premium')),
@@ -270,8 +268,8 @@ class HomeScreen extends StatelessWidget {
                 ),
                 ElevatedButton.icon(
                   onPressed: () {
-                    Telling.instance
-                        .setUserProperty('subscription_tier', 'enterprise');
+                    Telling.instance.setUserProperty(
+                        key: 'subscription_tier', value: 'enterprise');
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                           content:
@@ -477,7 +475,7 @@ class _UserPropertiesScreenState extends State<UserPropertiesScreen> {
       value = double.parse(_valueController.text);
     }
 
-    Telling.instance.setUserProperty(_keyController.text, value);
+    Telling.instance.setUserProperty(key: _keyController.text, value: value);
 
     setState(() {
       _currentProperties[_keyController.text] = value;
@@ -548,22 +546,23 @@ class _UserPropertiesScreenState extends State<UserPropertiesScreen> {
                 _QuickPropertyButton(
                   label: 'Set Age: 25',
                   onPressed: () {
-                    Telling.instance.setUserProperty('age', 25);
+                    Telling.instance.setUserProperty(key: 'age', value: 25);
                     setState(() => _currentProperties['age'] = 25);
                   },
                 ),
                 _QuickPropertyButton(
                   label: 'Set Country: US',
                   onPressed: () {
-                    Telling.instance.setUserProperty('country', 'US');
+                    Telling.instance
+                        .setUserProperty(key: 'country', value: 'US');
                     setState(() => _currentProperties['country'] = 'US');
                   },
                 ),
                 _QuickPropertyButton(
                   label: 'Set Premium',
                   onPressed: () {
-                    Telling.instance
-                        .setUserProperty('subscription_tier', 'premium');
+                    Telling.instance.setUserProperty(
+                        key: 'subscription_tier', value: 'premium');
                     setState(() =>
                         _currentProperties['subscription_tier'] = 'premium');
                   },
@@ -571,7 +570,7 @@ class _UserPropertiesScreenState extends State<UserPropertiesScreen> {
                 _QuickPropertyButton(
                   label: 'Set MRR: 99.99',
                   onPressed: () {
-                    Telling.instance.setUserProperty('mrr', 99.99);
+                    Telling.instance.setUserProperty(key: 'mrr', value: 99.99);
                     setState(() => _currentProperties['mrr'] = 99.99);
                   },
                 ),
