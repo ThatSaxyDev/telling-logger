@@ -2,16 +2,18 @@ import 'device_metadata.dart';
 
 enum LogLevel { trace, debug, info, warning, error, fatal }
 
+/// Log category type
+///
+/// Simplified to 4 core types:
+/// - [general] - Debug/operational logs
+/// - [analytics] - User events, funnels, screen views
+/// - [crash] - Errors and unhandled exceptions
+/// - [performance] - Performance metrics
 enum LogType {
   general,
   analytics,
-  event,
-  performance,
-  network,
-  security,
-  exception,
   crash,
-  custom,
+  performance,
 }
 
 extension LogLevelExtensions on LogLevel {
@@ -66,20 +68,34 @@ extension LogTypeExtensions on LogType {
         return 'General';
       case LogType.analytics:
         return 'Analytics';
-      case LogType.event:
-        return 'Event';
-      case LogType.performance:
-        return 'Performance';
-      case LogType.network:
-        return 'Network';
-      case LogType.security:
-        return 'Security';
-      case LogType.exception:
-        return 'Exception';
       case LogType.crash:
         return 'Crash';
-      case LogType.custom:
-        return 'Custom';
+      case LogType.performance:
+        return 'Performance';
+    }
+  }
+
+  /// Parse LogType from string with backward compatibility for deprecated types
+  static LogType fromString(String type) {
+    switch (type.toLowerCase()) {
+      case 'general':
+      case 'log': // Legacy
+      case 'error': // Legacy (type, not level)
+      case 'errorr': // Legacy typo
+      case 'network': // Deprecated → general
+      case 'security': // Deprecated → general
+      case 'custom': // Deprecated → general
+        return LogType.general;
+      case 'analytics':
+      case 'event': // Deprecated → analytics
+        return LogType.analytics;
+      case 'crash':
+      case 'exception': // Deprecated → crash
+        return LogType.crash;
+      case 'performance':
+        return LogType.performance;
+      default:
+        return LogType.general;
     }
   }
 }

@@ -65,12 +65,11 @@ class LogRateLimiter {
     }
 
     // 3. Check type-specific throttling
-    // Only throttle crashes and exceptions to prevent flood loops.
+    // Only throttle crashes to prevent flood loops.
     // Allow analytics and general logs to flow freely (bounded by maxLogsPerSecond).
-    final isCrashOrException = event.type == LogType.crash ||
-        event.type == LogType.exception;
+    final isCrash = event.type == LogType.crash;
     
-    if (isCrashOrException) {
+    if (isCrash) {
       final lastSentOfType = _lastSentByType[throttleKey];
       if (lastSentOfType != null &&
           now.difference(lastSentOfType) < crashThrottleWindow) {

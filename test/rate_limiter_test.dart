@@ -195,26 +195,26 @@ void main() {
         expect(rateLimiter.shouldSendLog(crash2), isFalse);
       });
 
-      test('throttles exception logs with longer window', () {
+      test('throttles multiple crash logs with longer window', () {
         rateLimiter.crashThrottleWindow = const Duration(milliseconds: 200);
         
-        final exception1 = TestHelpers.createLogEvent(
-          message: 'Different exception 1',
-          type: LogType.exception,
+        final crash3 = TestHelpers.createLogEvent(
+          message: 'Different crash 3',
+          type: LogType.crash,
           level: LogLevel.error,
         );
-        final exception2 = TestHelpers.createLogEvent(
-          message: 'Different exception 2',
-          type: LogType.exception,
+        final crash4 = TestHelpers.createLogEvent(
+          message: 'Different crash 4',
+          type: LogType.crash,
           level: LogLevel.error,
         );
         
-        // First exception allowed
-        expect(rateLimiter.shouldSendLog(exception1), isTrue);
-        rateLimiter.markLogSent(exception1);
+        // First crash allowed
+        expect(rateLimiter.shouldSendLog(crash3), isTrue);
+        rateLimiter.markLogSent(crash3);
         
-        // Second exception immediately after should be throttled
-        expect(rateLimiter.shouldSendLog(exception2), isFalse);
+        // Second crash immediately after should be throttled
+        expect(rateLimiter.shouldSendLog(crash4), isFalse);
       });
 
       test('does not throttle non-crash/exception logs by type', () {
