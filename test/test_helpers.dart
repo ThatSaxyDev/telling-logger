@@ -42,7 +42,6 @@ class TestHelpers {
     String deviceModel = 'Pixel 7',
     String appVersion = '1.0.0',
     String appBuildNumber = '1',
-    String sessionId = 'test_session_123',
   }) {
     return DeviceMetadata(
       platform: platform,
@@ -50,7 +49,6 @@ class TestHelpers {
       deviceModel: deviceModel,
       appVersion: appVersion,
       appBuildNumber: appBuildNumber,
-      sessionId: sessionId,
     );
   }
 

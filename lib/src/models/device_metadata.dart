@@ -1,10 +1,12 @@
+/// Device metadata collected once per session
+/// Note: sessionId is intentionally NOT included here as it's already
+/// present at the LogEvent level to avoid data duplication
 class DeviceMetadata {
   final String? platform; // iOS, Android, Web, etc.
   final String? osVersion;
   final String? deviceModel;
   final String? appVersion;
   final String? appBuildNumber;
-  final String sessionId;
 
   DeviceMetadata({
     this.platform,
@@ -12,7 +14,6 @@ class DeviceMetadata {
     this.deviceModel,
     this.appVersion,
     this.appBuildNumber,
-    required this.sessionId,
   });
 
   Map<String, dynamic> toJson() {
@@ -22,7 +23,7 @@ class DeviceMetadata {
       if (deviceModel != null) 'deviceModel': deviceModel,
       if (appVersion != null) 'appVersion': appVersion,
       if (appBuildNumber != null) 'appBuildNumber': appBuildNumber,
-      'sessionId': sessionId,
     };
   }
 }
+

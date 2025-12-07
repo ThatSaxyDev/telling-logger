@@ -5,9 +5,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'models/device_metadata.dart';
 
 class DeviceInfoCollector {
+  /// Collects device metadata once during SDK initialization
+  /// Note: sessionId is managed separately in the Telling class
   static Future<DeviceMetadata> collect() async {
-    final sessionId = DateTime.now().millisecondsSinceEpoch.toString();
-    
     try {
       final deviceInfo = DeviceInfoPlugin();
       final packageInfo = await PackageInfo.fromPlatform();
@@ -54,13 +54,11 @@ class DeviceInfoCollector {
         deviceModel: deviceModel,
         appVersion: packageInfo.version,
         appBuildNumber: packageInfo.buildNumber,
-        sessionId: sessionId,
       );
     } catch (e) {
       // Fallback if device info collection fails
       return DeviceMetadata(
         platform: kIsWeb ? 'Web' : 'Unknown',
-        sessionId: sessionId,
       );
     }
   }
