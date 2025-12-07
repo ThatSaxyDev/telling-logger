@@ -569,13 +569,11 @@ class Telling {
       if (useCompression) {
         body = gzip.encode(jsonBytes);
         headers['Content-Encoding'] = 'gzip';
-        if (_enableDebugLogs) {
-          final savings = ((1 - body.length / jsonBytes.length) * 100)
-              .toStringAsFixed(0);
-          // print(
-          //   'Telling: Compressed payload ${jsonBytes.length} → ${body.length} bytes ($savings% reduction)',
-          // );
-        }
+        // Compression logging disabled for cleaner output
+        // if (_enableDebugLogs) {
+        //   final savings = ((1 - body.length / jsonBytes.length) * 100).toStringAsFixed(0);
+        //   print('Telling: Compressed ${jsonBytes.length} → ${body.length} bytes ($savings% reduction)');
+        // }
       } else {
         body = jsonBytes;
       }

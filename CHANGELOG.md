@@ -2,6 +2,45 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.2.0 - 2025-12-07
+
+### Added
+- **Exception Capture**: New `captureException()` method for reporting handled exceptions from try-catch blocks.
+  ```dart
+  try {
+    await riskyOperation();
+  } catch (e, stackTrace) {
+    Telling.instance.captureException(
+      error: e,
+      stackTrace: stackTrace,
+      context: 'checkout_flow',
+    );
+  }
+  ```
+- **TellingTryCatch Mixin**: Convenient wrapper for async operations with automatic error capture.
+  ```dart
+  class MyService with TellingTryCatch {
+    Future<User?> fetchUser(String id) async {
+      return tryRun(
+        context: 'fetch_user',
+        func: () async => await api.getUser(id),
+        onError: (e, stack) => showToast('Failed'),
+      );
+    }
+  }
+  ```
+- **Exponential Backoff**: Failed log submissions now retry with increasing delays (5s → 10s → 20s → 40s → 80s).
+- **Buffer Size Limits**: Log buffer capped at 500 entries to prevent memory issues.
+
+### Changed
+- **Named Parameters**: `captureException()` and `setUserProperty()` now use named parameters for better readability.
+- **Improved Retry Logic**: Logs are preserved across app sessions when network is unavailable.
+
+### Fixed
+- **Log ID Collisions**: Unique IDs now use microsecond precision + counter to prevent duplicates.
+- **Deduplication Consistency**: SDK and server now use identical hash algorithms.
+- **Persisted Log Context**: Reloaded logs now retain userId, deviceMetadata, and sessionId.
+
 ## 1.1.5 - 2025-12-07
 
 ### Improved

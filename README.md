@@ -34,7 +34,7 @@ Add `telling_logger` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  telling_logger: ^1.1.5
+  telling_logger: ^1.2.0
 ```
 
 Then install:
@@ -98,11 +98,11 @@ Telling.instance.log(
 try {
   await processPayment();
 } catch (e, stack) {
-  Telling.instance.log(
-    'Payment failed',
-    level: LogLevel.error,
+  Telling.instance.captureException(
     error: e,
     stackTrace: stack,
+    context: 'payment_processing',
+    metadata: {'amount': 29.99},
   );
 }
 ```
@@ -163,6 +163,64 @@ Categorize logs for better filtering and analytics:
 | `LogType.custom`      | Custom log categories                |
 
 ## 🎯 Advanced Features
+
+### Exception Capture
+
+Report handled exceptions from try-catch blocks without crashing your app:
+
+```dart
+try {
+  await riskyOperation();
+} catch (e, stackTrace) {
+  Telling.instance.captureException(
+    error: e,
+    stackTrace: stackTrace,
+    context: 'checkout_flow',  // Where did this happen?
+    metadata: {'orderId': '12345'},
+  );
+  
+  // Handle gracefully for the user
+  showErrorDialog('Something went wrong');
+}
+```
+
+### TellingTryCatch Mixin
+
+For cleaner code, use the `TellingTryCatch` mixin to automatically capture exceptions:
+
+```dart
+class PaymentService with TellingTryCatch {
+  // Async operation that returns a value (or null on failure)
+  Future<Receipt?> processPayment(double amount) async {
+    return tryRun(
+      context: 'process_payment',
+      metadata: {'amount': amount},
+      func: () async {
+        final result = await api.charge(amount);
+        return Receipt.fromJson(result);
+      },
+      onSuccess: () => print('Payment succeeded!'),
+      onError: (e, stack) => showToast('Payment failed'),
+    );
+  }
+
+  // Async operation with no return value
+  Future<void> saveReceipt(Receipt receipt) async {
+    await tryRunVoid(
+      context: 'save_receipt',
+      func: () async => await storage.save(receipt),
+    );
+  }
+
+  // Synchronous operation
+  Config? parseConfig(String json) {
+    return tryRunSync(
+      context: 'parse_config',
+      func: () => Config.fromJson(jsonDecode(json)),
+    );
+  }
+}
+```
 
 ### User Context Tracking
 
