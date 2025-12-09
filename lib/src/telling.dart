@@ -24,6 +24,8 @@ class Telling {
   bool _initialized = false;
   DeviceMetadata? _deviceMetadata;
   static const String _storageKey = 'telling_logs_buffer';
+  static const String _firstOpenKey = 'telling_first_open';
+  static const String _lastAppVersionKey = 'telling_last_app_version';
   bool _enableDebugLogs = false;
 
   // User context
@@ -103,6 +105,9 @@ class Telling {
     // Collect device metadata
     _deviceMetadata = await DeviceInfoCollector.collect();
 
+    // Track lifecycle events
+    await _trackLifecycleEvents();
+
     // Start new session
     _startNewSession();
 
@@ -117,6 +122,54 @@ class Telling {
     if (_enableDebugLogs) {
       print('Telling SDK Initialized');
     }
+  }
+
+  /// Track first_open, app_update, and app_open lifecycle events
+  Future<void> _trackLifecycleEvents() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Check for first open (new install)
+    final hasOpenedBefore = prefs.getBool(_firstOpenKey) ?? false;
+    if (!hasOpenedBefore) {
+      log(
+        'first_open',
+        level: LogLevel.info,
+        type: LogType.analytics,
+        metadata: {
+          'app_version': _deviceMetadata?.appVersion,
+          'install_time': DateTime.now().toUtc().toIso8601String(),
+        },
+      );
+      await prefs.setBool(_firstOpenKey, true);
+    }
+
+    // Check for app update (version change)
+    final lastVersion = prefs.getString(_lastAppVersionKey);
+    final currentVersion = _deviceMetadata?.appVersion;
+    if (lastVersion != null &&
+        currentVersion != null &&
+        lastVersion != currentVersion) {
+      log(
+        'app_update',
+        level: LogLevel.info,
+        type: LogType.analytics,
+        metadata: {
+          'previous_version': lastVersion,
+          'current_version': currentVersion,
+        },
+      );
+    }
+    if (currentVersion != null) {
+      await prefs.setString(_lastAppVersionKey, currentVersion);
+    }
+
+    // Always log app_open
+    log(
+      'app_open',
+      level: LogLevel.info,
+      type: LogType.analytics,
+      metadata: {'app_version': _deviceMetadata?.appVersion},
+    );
   }
 
   /// Enable automatic crash reporting
