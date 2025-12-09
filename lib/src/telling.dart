@@ -51,6 +51,10 @@ class Telling {
   DateTime? _screenStartTime;
   String? _currentScreen;
 
+  // Breadcrumbs for debugging context
+  final List<Map<String, dynamic>> _breadcrumbs = [];
+  static const int _maxBreadcrumbs = 20;
+
   // Performance tracking
   // PerformanceTracker? _performanceTracker;
 
@@ -65,6 +69,7 @@ class Telling {
   // Buffer limits
   static const int _maxBufferSize = 500;
   static const int _bufferTrimSize = 400; // Trim to this when max reached
+  static const int _batchFlushSize = 20; // Flush when buffer hits this size
 
   /// Initialize the Telling SDK
   Future<void> init(
@@ -378,6 +383,29 @@ class Telling {
     _userProperties.clear();
   }
 
+  /// Internal: Add a breadcrumb for debugging context (called automatically)
+  void _addBreadcrumb(String message, {Map<String, dynamic>? metadata}) {
+    if (!_initialized) return;
+
+    final breadcrumb = <String, dynamic>{
+      'message': message,
+      'timestamp': DateTime.now().toUtc().toIso8601String(),
+      if (metadata != null) ...metadata,
+    };
+
+    _breadcrumbs.add(breadcrumb);
+
+    // Maintain circular buffer - remove oldest when exceeding max
+    if (_breadcrumbs.length > _maxBreadcrumbs) {
+      _breadcrumbs.removeAt(0);
+    }
+  }
+
+  /// Clear all breadcrumbs (called on new session)
+  void _clearBreadcrumbs() {
+    _breadcrumbs.clear();
+  }
+
   /// Get the screen tracker for use with Navigator
   RouteObserver<PageRoute> get screenTracker {
     _screenTracker ??= ScreenTracker(onScreenView: _handleScreenView);
@@ -450,6 +478,13 @@ class Telling {
       return;
     }
 
+    // Build metadata with breadcrumbs for crash logs
+    final enrichedMetadata = <String, dynamic>{
+      ...?metadata,
+      if (type == LogType.crash && _breadcrumbs.isNotEmpty)
+        'breadcrumbs': List<Map<String, dynamic>>.from(_breadcrumbs),
+    };
+
     final event = LogEvent(
       type: type,
       level: level,
@@ -458,8 +493,7 @@ class Telling {
       stackTrace:
           stackTrace?.toString() ??
           (error is Error ? error.stackTrace?.toString() : null),
-      metadata:
-          metadata, // User properties are sent separately via setUserProperty logs
+      metadata: enrichedMetadata.isNotEmpty ? enrichedMetadata : null,
       deviceMetadata: _deviceMetadata,
       userId: _userId,
       userName: _userName,
@@ -488,8 +522,13 @@ class Telling {
     _rateLimiter.markLogSent(event);
     _persistLogs(); // Save to disk immediately
 
-    // If error, flush immediately
-    if (level == LogLevel.error) {
+    // Auto-add breadcrumb for analytics events (captures user activity trail)
+    if (type == LogType.analytics) {
+      _addBreadcrumb(message, metadata: metadata);
+    }
+
+    // Flush immediately on error or when batch size reached
+    if (level == LogLevel.error || _buffer.length >= _batchFlushSize) {
       _flush();
     }
   }
@@ -725,6 +764,9 @@ class Telling {
 
   /// Start a new session
   void _startNewSession() {
+    // Clear breadcrumbs for fresh activity trail
+    _clearBreadcrumbs();
+
     _currentSession = Session(
       sessionId: _generateSessionId(),
       startTime: DateTime.now(),
