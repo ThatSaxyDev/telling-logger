@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.2.2 - 2025-12-09
+
+### Added
+- **Batch-by-Size**: Logs now auto-flush when buffer reaches 20 events for more responsive sending.
+- **Breadcrumbs**: Automatic activity trail (max 20 events) captured and attached to crash logs for better debugging context.
+- **Lifecycle Events**: Auto-logs `first_open` (new install), `app_update` (version change), and `app_open` (each launch).
+
+### Improved
+- **Efficiency**: Reduced unnecessary network calls with smarter batch flushing.
+- **Debugging**: Crash logs now include breadcrumb trail showing user activity before the crash.
+
 ## 1.2.1 - 2025-12-07
 
 ### Fixed

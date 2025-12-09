@@ -34,7 +34,7 @@ Add `telling_logger` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  telling_logger: ^1.2.1
+  telling_logger: ^1.2.2
 ```
 
 Then install:
