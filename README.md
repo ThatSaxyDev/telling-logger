@@ -34,7 +34,7 @@ Add `telling_logger` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  telling_logger: ^1.2.2
+  telling_logger: ^1.3.0
 ```
 
 Then install:
@@ -528,6 +528,50 @@ void main() async {
 - Actual crashes are logged as `fatal` errors
 - Full stack traces included
 - Automatic retry with exponential backoff
+
+### Remote Config & Force Update
+
+Manage your app's version and configuration remotely from the Telling Dashboard.
+
+#### 1. Check for Updates
+
+```dart
+// Check on app startup (e.g., in main.dart or Splash Screen)
+final result = await Telling.instance.checkVersion();
+
+if (result.requiresUpdate) {
+  // Update is available
+  if (result.isRequired) {
+    // Force update needed (blocking)
+  } else {
+    // Optional update (soft prompt)
+  }
+}
+```
+
+#### 2. Use Built-in Update Screen
+
+We provide a plug-and-play widget to handle the update flow for you:
+
+```dart
+if (result.requiresUpdate) {
+  runApp(MaterialApp(
+    home: TellingForceUpdateScreen(
+      result: result,
+      primaryColor: Colors.blue, // Match your brand
+      onSkip: () {
+        // Handle skip (only for optional updates)
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen()));
+      },
+    ),
+  ));
+}
+```
+
+This screen automatically handles:
+- **Blocking vs Optional:** Removes "Skip" button for mandatory updates.
+- **Store Redirection:** Opens the correct store URL (iOS/Android) when "Update Now" is tapped.
+- **Theming:** Customizable colors and text.
 
 ## 🔧 Configuration Options
 

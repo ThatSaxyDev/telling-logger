@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.3.0 - 2025-12-20
+
+### Added
+- **Remote Config Support**: New `checkVersion()` API to check for app updates against backend rules.
+- **Force Update UI**: New `TellingForceUpdateScreen` widget for plug-and-play update enforcement.
+- **Backend Integration**: Direct integration with Telling Server's public version check endpoint.
+
 ## 1.2.2 - 2025-12-09
 
 ### Added
