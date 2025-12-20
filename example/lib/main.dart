@@ -7,7 +7,7 @@ void main() async {
   // Initialize Telling SDK
   // Replace 'YOUR_API_KEY' with a valid key from your dashboard
   await Telling.instance.init(
-    'API_KEY_HERE',
+    'API_KEY',
     enableDebugLogs: true,
   );
 
@@ -32,7 +32,74 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
-      home: const LoginScreen(),
+      home: const StartupScreen(),
+    );
+  }
+}
+
+class StartupScreen extends StatefulWidget {
+  const StartupScreen({super.key});
+
+  @override
+  State<StartupScreen> createState() => _StartupScreenState();
+}
+
+class _StartupScreenState extends State<StartupScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _checkAppVersion();
+  }
+
+  Future<void> _checkAppVersion() async {
+    // Artificial delay to show the loading state (optional)
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (!mounted) return;
+
+    // Check for updates
+    final result = await Telling.instance.checkVersion();
+
+    if (!mounted) return;
+
+    if (result.requiresUpdate) {
+      // Show Force Update Screen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => TellingForceUpdateScreen(
+            result: result,
+            primaryColor: Colors.blue,
+            onSkip: _navigateToLogin, // Allow skipping if optional
+          ),
+        ),
+      );
+    } else {
+      _navigateToLogin();
+    }
+  }
+
+  void _navigateToLogin() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => const LoginScreen(),
+        settings: const RouteSettings(name: 'LoginScreen'),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Checking for updates...'),
+          ],
+        ),
+      ),
     );
   }
 }

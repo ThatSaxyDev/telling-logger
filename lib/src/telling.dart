@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show gzip;
+import 'dart:io' show gzip, Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models/log_event.dart';
 import 'models/device_metadata.dart';
+import 'models/version_check_result.dart';
 import 'models/session.dart';
 import 'device_info_collector.dart';
 import 'rate_limiter.dart';
@@ -19,8 +20,7 @@ class Telling {
   static Telling get instance => _instance;
 
   String? _apiKey;
-  final String _baseUrl =
-      'https://tellingserver.globeapp.dev/api/v1/logs';
+  final String _baseUrl = 'https://tellingserver.globeapp.dev/api/v1/logs';
   bool _initialized = false;
   DeviceMetadata? _deviceMetadata;
   static const String _storageKey = 'telling_logs_buffer';
@@ -121,6 +121,68 @@ class Telling {
 
     if (_enableDebugLogs) {
       print('Telling SDK Initialized');
+    }
+  }
+
+  /// Check if the app version meets the minimum requirements defined in the dashboard.
+  ///
+  /// Returns a [VersionCheckResult] indicating if an update is required.
+  Future<VersionCheckResult> checkVersion() async {
+    if (!_initialized || _apiKey == null) {
+      if (_enableDebugLogs) print('Telling SDK not initialized');
+      return VersionCheckResult.noUpdateRequired;
+    }
+
+    final currentVersion = _deviceMetadata?.appVersion;
+    if (currentVersion == null) {
+      return VersionCheckResult.noUpdateRequired;
+    }
+
+    try {
+      final platform = Platform.isIOS
+          ? 'ios'
+          : Platform.isAndroid
+          ? 'android'
+          : 'unknown';
+
+      if (platform == 'unknown') {
+        return VersionCheckResult.noUpdateRequired;
+      }
+
+      final uri =
+          Uri.parse(
+            'https://tellingserver.globeapp.dev/api/v1/project/version-check',
+          ).replace(
+            queryParameters: {'platform': platform, 'version': currentVersion},
+          );
+
+      final response = await http.get(
+        uri,
+        headers: {'x-api-key': _apiKey!, 'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode != 200) {
+        if (_enableDebugLogs) {
+          print(
+            'Failed to check version: ${response.statusCode} - ${response.body}',
+          );
+        }
+        return VersionCheckResult.noUpdateRequired;
+      }
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+      return VersionCheckResult(
+        requiresUpdate: data['requiresUpdate'] as bool? ?? false,
+        isRequired: data['isRequired'] as bool? ?? false,
+        storeUrl: data['storeUrl'] as String?,
+        message: data['message'] as String?,
+      );
+    } catch (e) {
+      if (_enableDebugLogs) {
+        print('Error checking version: $e');
+      }
+      return VersionCheckResult.noUpdateRequired;
     }
   }
 
@@ -613,7 +675,9 @@ class Telling {
     // Check if we should wait before retrying (exponential backoff)
     if (_nextRetryTime != null && DateTime.now().isBefore(_nextRetryTime!)) {
       if (_enableDebugLogs) {
-        final waitSeconds = _nextRetryTime!.difference(DateTime.now()).inSeconds;
+        final waitSeconds = _nextRetryTime!
+            .difference(DateTime.now())
+            .inSeconds;
         print('Telling: Waiting ${waitSeconds}s before retry (backoff)');
       }
       return;
@@ -730,7 +794,9 @@ class Telling {
           // Keep logs in buffer for next app session
         } else {
           if (_enableDebugLogs) {
-            final backoffSeconds = _nextRetryTime!.difference(DateTime.now()).inSeconds;
+            final backoffSeconds = _nextRetryTime!
+                .difference(DateTime.now())
+                .inSeconds;
             print(
               'Telling: Failed (${response.statusCode}). Retry $_consecutiveFailures/$_maxConsecutiveFailures in ${backoffSeconds}s',
             );
@@ -754,7 +820,9 @@ class Telling {
         // Keep logs in buffer for next app session
       } else {
         if (_enableDebugLogs) {
-          final backoffSeconds = _nextRetryTime!.difference(DateTime.now()).inSeconds;
+          final backoffSeconds = _nextRetryTime!
+              .difference(DateTime.now())
+              .inSeconds;
           print(
             'Telling: Connection issue. Retry $_consecutiveFailures/$_maxConsecutiveFailures in ${backoffSeconds}s',
           );
@@ -767,7 +835,8 @@ class Telling {
 
   /// Calculate exponential backoff: 5s, 10s, 20s, 40s, 80s
   void _setBackoff() {
-    final backoffSeconds = 5 * (1 << (_consecutiveFailures - 1)); // 5, 10, 20, 40, 80
+    final backoffSeconds =
+        5 * (1 << (_consecutiveFailures - 1)); // 5, 10, 20, 40, 80
     _nextRetryTime = DateTime.now().add(Duration(seconds: backoffSeconds));
   }
 
