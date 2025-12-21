@@ -185,17 +185,60 @@ class Telling {
           if (_enableDebugLogs) {
             print('Telling: Update snoozed for min version $minVersion');
           }
+          // Log version check with snoozed status
+          log(
+            'update_check_completed',
+            level: LogLevel.info,
+            type: LogType.analytics,
+            metadata: {
+              'requires_update': true,
+              'is_required': false,
+              'min_version': minVersion,
+              'current_version': currentVersion,
+              'is_snoozed': true,
+            },
+          );
           return VersionCheckResult.noUpdateRequired;
         }
       }
 
-      return VersionCheckResult(
+      final result = VersionCheckResult(
         requiresUpdate: requiresUpdate,
         isRequired: isRequired,
         storeUrl: data['storeUrl'] as String?,
         message: data['message'] as String?,
         minVersion: minVersion,
       );
+
+      // Log version check completion
+      log(
+        'update_check_completed',
+        level: LogLevel.info,
+        type: LogType.analytics,
+        metadata: {
+          'requires_update': result.requiresUpdate,
+          'is_required': result.isRequired,
+          'min_version': result.minVersion,
+          'current_version': currentVersion,
+          'is_snoozed': false,
+        },
+      );
+
+      // If update is required, log that user will be prompted
+      if (result.requiresUpdate) {
+        log(
+          'update_prompted',
+          level: LogLevel.info,
+          type: LogType.analytics,
+          metadata: {
+            'is_required': result.isRequired,
+            'min_version': result.minVersion,
+            'current_version': currentVersion,
+          },
+        );
+      }
+
+      return result;
     } catch (e) {
       if (_enableDebugLogs) {
         print('Error checking version: $e');
@@ -275,11 +318,52 @@ class Telling {
     );
     await prefs.setString(_snoozedMinVersionKey, minVersion);
 
+    // Log the snooze event
+    log(
+      'update_snoozed',
+      level: LogLevel.info,
+      type: LogType.analytics,
+      metadata: {
+        'snooze_days': clampedDays,
+        'min_version': minVersion,
+        'current_version': _deviceMetadata?.appVersion,
+      },
+    );
+
     if (_enableDebugLogs) {
       print(
         'Telling: Update snoozed until $snoozedUntil for min version $minVersion',
       );
     }
+  }
+
+  /// Call this when the user accepts an update prompt and you're about to
+  /// redirect them to the app store.
+  ///
+  /// This logs the `update_accepted` analytics event before opening the store.
+  /// Call this right before launching the store URL to ensure the event is
+  /// captured before the user leaves the app.
+  ///
+  /// Example:
+  /// ```dart
+  /// if (shouldUpdate == true) {
+  ///   await Telling.instance.acceptUpdate(minVersion: result.minVersion);
+  ///   launchUrl(Uri.parse(result.storeUrl!));
+  /// }
+  /// ```
+  Future<void> acceptUpdate({String? minVersion}) async {
+    log(
+      'update_accepted',
+      level: LogLevel.info,
+      type: LogType.analytics,
+      metadata: {
+        'min_version': minVersion,
+        'current_version': _deviceMetadata?.appVersion,
+      },
+    );
+
+    // Flush immediately to ensure event is sent before user leaves the app
+    await _flush();
   }
 
   /// Track first_open, app_update, and app_open lifecycle events

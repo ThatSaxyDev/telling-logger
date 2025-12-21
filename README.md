@@ -34,7 +34,7 @@ Add `telling_logger` to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  telling_logger: ^1.4.0
+  telling_logger: ^1.4.1
 ```
 
 Then install:
@@ -571,6 +571,30 @@ if (result.requiresUpdate && !result.isRequired) {
 - **0 days**: No snooze, prompt every app launch
 - **1-3 days**: Suppress prompt until snooze expires
 - **Version change**: Snooze resets when you bump the minimum version
+
+#### Track Update Acceptance
+
+When the user accepts an update, call `acceptUpdate()` before opening the store URL:
+
+```dart
+if (shouldUpdate == true) {
+  await Telling.instance.acceptUpdate(minVersion: result.minVersion);
+  launchUrl(Uri.parse(result.storeUrl!));
+}
+```
+
+#### Automatic Update Analytics
+
+The SDK automatically tracks update-related events internally:
+
+| Event | When Logged | Properties |
+|-------|-------------|------------|
+| `update_check_completed` | Every `checkVersion()` call | `requires_update`, `is_required`, `min_version`, `current_version`, `is_snoozed` |
+| `update_prompted` | When update is required (not snoozed) | `is_required`, `min_version`, `current_version` |
+| `update_snoozed` | When `snoozeUpdate()` is called | `snooze_days`, `min_version`, `current_version` |
+| `update_accepted` | When `acceptUpdate()` is called | `min_version`, `current_version` |
+
+This gives you a complete funnel: **check → prompt → (snooze OR accept)** without any manual event logging.
 
 
 ## 🔧 Configuration Options

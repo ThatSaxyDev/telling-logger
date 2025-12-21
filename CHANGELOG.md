@@ -2,11 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## 1.4.0 - 2025-12-21
+## 1.4.1 - 2025-12-21
 
 ### Added
 - **Snooze for Optional Updates**: New `snoozeUpdate()` method to suppress update prompts for 1-3 days when users skip optional updates.
 - **minVersion Tracking**: `VersionCheckResult` now includes `minVersion` field for snooze tracking.
+- **Internal Update Analytics**: Automatic tracking of update-related events:
+  - `update_check_completed` - Logged on every `checkVersion()` call
+  - `update_prompted` - Logged when an update is required (not snoozed)
+  - `update_snoozed` - Logged when `snoozeUpdate()` is called
+  - `update_accepted` - Logged when new `acceptUpdate()` method is called
+- **acceptUpdate() Method**: New helper method to call before opening the store URL, ensuring the update acceptance event is captured.
 
 ### Removed
 - **TellingForceUpdateScreen**: Removed built-in update screen widget. Developers now build their own UI and use `checkVersion()` + `snoozeUpdate()`.

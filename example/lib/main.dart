@@ -7,7 +7,7 @@ void main() async {
   // Initialize Telling SDK
   // Replace 'YOUR_API_KEY' with a valid key from your dashboard
   await Telling.instance.init(
-    'API_KEY',
+    'PkA14c8VUERfcQ0s2PSE9rytbJ9uDkJ1Z2h1drFhEtY=',
     enableDebugLogs: true,
   );
 
@@ -89,7 +89,9 @@ class _StartupScreenState extends State<StartupScreen> {
       if (!mounted) return;
 
       if (shouldUpdate == true) {
-        // Open store URL (don't navigate to login)
+        // Log the update acceptance before opening store
+        await Telling.instance.acceptUpdate(minVersion: result.minVersion);
+        // Open store URL
         // launchUrl(Uri.parse(result.storeUrl!));
         return;
       }
