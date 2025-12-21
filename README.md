@@ -533,45 +533,45 @@ void main() async {
 
 Manage your app's version and configuration remotely from the Telling Dashboard.
 
-#### 1. Check for Updates
+#### Check for Updates
 
 ```dart
 // Check on app startup (e.g., in main.dart or Splash Screen)
 final result = await Telling.instance.checkVersion();
 
 if (result.requiresUpdate) {
-  // Update is available
   if (result.isRequired) {
-    // Force update needed (blocking)
+    // Force update - show blocking UI, open store
   } else {
-    // Optional update (soft prompt)
+    // Optional update - user can skip
   }
 }
 ```
 
-#### 2. Use Built-in Update Screen
+#### Snooze for Optional Updates
 
-We provide a plug-and-play widget to handle the update flow for you:
+When the user skips an optional update, call `snoozeUpdate()` to suppress the prompt:
 
 ```dart
-if (result.requiresUpdate) {
-  runApp(MaterialApp(
-    home: TellingForceUpdateScreen(
-      result: result,
-      primaryColor: Colors.blue, // Match your brand
-      onSkip: () {
-        // Handle skip (only for optional updates)
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen()));
-      },
-    ),
-  ));
+final result = await Telling.instance.checkVersion();
+
+if (result.requiresUpdate && !result.isRequired) {
+  final skipped = await showUpdateDialog();
+  
+  if (skipped && result.minVersion != null) {
+    await Telling.instance.snoozeUpdate(
+      days: 3, // 0 = no snooze, 1-3 = days to suppress
+      minVersion: result.minVersion!,
+    );
+  }
 }
 ```
 
-This screen automatically handles:
-- **Blocking vs Optional:** Removes "Skip" button for mandatory updates.
-- **Store Redirection:** Opens the correct store URL (iOS/Android) when "Update Now" is tapped.
-- **Theming:** Customizable colors and text.
+**Snooze Behavior:**
+- **0 days**: No snooze, prompt every app launch
+- **1-3 days**: Suppress prompt until snooze expires
+- **Version change**: Snooze resets when you bump the minimum version
+
 
 ## 🔧 Configuration Options
 

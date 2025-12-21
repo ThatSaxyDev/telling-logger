@@ -26,6 +26,8 @@ class Telling {
   static const String _storageKey = 'telling_logs_buffer';
   static const String _firstOpenKey = 'telling_first_open';
   static const String _lastAppVersionKey = 'telling_last_app_version';
+  static const String _updateSnoozedUntilKey = 'telling_update_snoozed_until';
+  static const String _snoozedMinVersionKey = 'telling_snoozed_min_version';
   bool _enableDebugLogs = false;
 
   // User context
@@ -172,17 +174,111 @@ class Telling {
 
       final data = jsonDecode(response.body) as Map<String, dynamic>;
 
+      final requiresUpdate = data['requiresUpdate'] as bool? ?? false;
+      final isRequired = data['isRequired'] as bool? ?? false;
+      final minVersion = data['minVersion'] as String?;
+
+      // For non-compulsory updates, check if user has snoozed this version
+      if (requiresUpdate && !isRequired && minVersion != null) {
+        final isSnoozed = await _isUpdateSnoozed(minVersion);
+        if (isSnoozed) {
+          if (_enableDebugLogs) {
+            print('Telling: Update snoozed for min version $minVersion');
+          }
+          return VersionCheckResult.noUpdateRequired;
+        }
+      }
+
       return VersionCheckResult(
-        requiresUpdate: data['requiresUpdate'] as bool? ?? false,
-        isRequired: data['isRequired'] as bool? ?? false,
+        requiresUpdate: requiresUpdate,
+        isRequired: isRequired,
         storeUrl: data['storeUrl'] as String?,
         message: data['message'] as String?,
+        minVersion: minVersion,
       );
     } catch (e) {
       if (_enableDebugLogs) {
         print('Error checking version: $e');
       }
       return VersionCheckResult.noUpdateRequired;
+    }
+  }
+
+  /// Check if the user has snoozed updates for a specific min version.
+  Future<bool> _isUpdateSnoozed(String minVersion) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final snoozedUntilStr = prefs.getString(_updateSnoozedUntilKey);
+      final snoozedMinVersion = prefs.getString(_snoozedMinVersionKey);
+
+      if (snoozedUntilStr == null || snoozedMinVersion == null) {
+        return false;
+      }
+
+      // Snooze only applies to the same min version
+      if (snoozedMinVersion != minVersion) {
+        return false;
+      }
+
+      final snoozedUntil = DateTime.tryParse(snoozedUntilStr);
+      if (snoozedUntil == null) {
+        return false;
+      }
+
+      return DateTime.now().isBefore(snoozedUntil);
+    } catch (e) {
+      if (_enableDebugLogs) {
+        print('Telling: Error checking snooze state: $e');
+      }
+      return false;
+    }
+  }
+
+  /// Snooze the update prompt for the specified number of days.
+  ///
+  /// Call this when the user taps "Later" or "Skip" on a non-compulsory update.
+  /// The snooze is tied to the specific [minVersion], so if you update the
+  /// minimum version on the dashboard, users will see the prompt again.
+  ///
+  /// Example:
+  /// ```dart
+  /// final result = await Telling.instance.checkVersion(snoozeDays: 2);
+  /// if (result.requiresUpdate && !result.isRequired) {
+  ///   final skipped = await showSkippableUpdateDialog();
+  ///   if (skipped && result.minVersion != null) {
+  ///     await Telling.instance.snoozeUpdate(days: 2, minVersion: result.minVersion!);
+  ///   }
+  /// }
+  /// ```
+  Future<void> snoozeUpdate({
+    required int days,
+    required String minVersion,
+  }) async {
+    // 0 or negative days = no snooze, prompt every time
+    if (days <= 0) {
+      if (_enableDebugLogs) {
+        print(
+          'Telling: Snooze days is 0, not snoozing (will prompt every time)',
+        );
+      }
+      return;
+    }
+
+    // Clamp to max 3 days
+    final clampedDays = days.clamp(1, 3);
+
+    final prefs = await SharedPreferences.getInstance();
+    final snoozedUntil = DateTime.now().add(Duration(days: clampedDays));
+    await prefs.setString(
+      _updateSnoozedUntilKey,
+      snoozedUntil.toIso8601String(),
+    );
+    await prefs.setString(_snoozedMinVersionKey, minVersion);
+
+    if (_enableDebugLogs) {
+      print(
+        'Telling: Update snoozed until $snoozedUntil for min version $minVersion',
+      );
     }
   }
 

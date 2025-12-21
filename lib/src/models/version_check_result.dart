@@ -18,11 +18,16 @@ class VersionCheckResult {
   /// Only present when [requiresUpdate] is true.
   final String? message;
 
+  /// The minimum version that triggered this update prompt.
+  /// Used for snooze tracking - snooze is per minimum version.
+  final String? minVersion;
+
   const VersionCheckResult({
     required this.requiresUpdate,
     this.isRequired = true,
     this.storeUrl,
     this.message,
+    this.minVersion,
   });
 
   /// Default result indicating no update is needed.
@@ -30,6 +35,6 @@ class VersionCheckResult {
 
   @override
   String toString() {
-    return 'VersionCheckResult(requiresUpdate: $requiresUpdate, isRequired: $isRequired, storeUrl: $storeUrl, message: $message)';
+    return 'VersionCheckResult(requiresUpdate: $requiresUpdate, isRequired: $isRequired, storeUrl: $storeUrl, message: $message, minVersion: $minVersion)';
   }
 }

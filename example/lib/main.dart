@@ -59,23 +59,53 @@ class _StartupScreenState extends State<StartupScreen> {
 
     // Check for updates
     final result = await Telling.instance.checkVersion();
+    print('Version check result: $result');
 
     if (!mounted) return;
 
     if (result.requiresUpdate) {
-      // Show Force Update Screen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => TellingForceUpdateScreen(
-            result: result,
-            primaryColor: Colors.blue,
-            onSkip: _navigateToLogin, // Allow skipping if optional
-          ),
+      // Show update dialog
+      final shouldUpdate = await showDialog<bool>(
+        context: context,
+        barrierDismissible: !result.isRequired,
+        builder: (_) => AlertDialog(
+          title:
+              Text(result.isRequired ? 'Update Required' : 'Update Available'),
+          content: Text(result.message ?? 'A new version is available.'),
+          actions: [
+            if (!result.isRequired)
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Later'),
+              ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Update Now'),
+            ),
+          ],
         ),
       );
-    } else {
-      _navigateToLogin();
+
+      if (!mounted) return;
+
+      if (shouldUpdate == true) {
+        // Open store URL (don't navigate to login)
+        // launchUrl(Uri.parse(result.storeUrl!));
+        return;
+      }
+
+      // User skipped (tapped "Later" or dismissed) - snooze and continue
+      if (result.minVersion != null) {
+        print('Snoozing update for minVersion: ${result.minVersion}');
+        await Telling.instance.snoozeUpdate(
+          days: 3,
+          minVersion: result.minVersion!,
+        );
+        print('Snooze saved successfully');
+      }
     }
+
+    _navigateToLogin();
   }
 
   void _navigateToLogin() {
