@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.4.0 - 2025-12-21
+
+### Added
+- **Snooze for Optional Updates**: New `snoozeUpdate()` method to suppress update prompts for 1-3 days when users skip optional updates.
+- **minVersion Tracking**: `VersionCheckResult` now includes `minVersion` field for snooze tracking.
+
+### Removed
+- **TellingForceUpdateScreen**: Removed built-in update screen widget. Developers now build their own UI and use `checkVersion()` + `snoozeUpdate()`.
+
+### Fixed
+- **Server Response**: Backend now returns `minVersion` in version check response for proper snooze tracking.
+
 ## 1.3.0 - 2025-12-20
 
 ### Added
