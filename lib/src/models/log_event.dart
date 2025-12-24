@@ -107,6 +107,8 @@ class LogEvent {
   final String message;
   final DateTime timestamp;
   final String? stackTrace;
+  /// Structured stack trace elements for better crash grouping and display.
+  final List<Map<String, String>>? stackTraceElements;
   final Map<String, dynamic>? metadata;
   final DeviceMetadata? deviceMetadata;
   final String? userId;
@@ -124,6 +126,7 @@ class LogEvent {
     required this.message,
     required this.timestamp,
     this.stackTrace,
+    this.stackTraceElements,
     this.metadata,
     this.deviceMetadata,
     this.userId,
@@ -147,6 +150,7 @@ class LogEvent {
       'message': message,
       'timestamp': timestamp.toIso8601String(),
       if (stackTrace != null) 'stackTrace': stackTrace,
+      if (stackTraceElements != null) 'stackTraceElements': stackTraceElements,
       if (metadata != null) 'metadata': metadata,
       if (deviceMetadata != null) 'device': deviceMetadata!.toJson(),
       if (userId != null) 'userId': userId,
@@ -173,6 +177,11 @@ class LogEvent {
           ? DateTime.parse(json['timestamp'] as String)
           : DateTime.now().toUtc(),
       stackTrace: json['stackTrace'] as String?,
+      stackTraceElements: json['stackTraceElements'] != null
+          ? (json['stackTraceElements'] as List)
+                .map((e) => Map<String, String>.from(e as Map))
+                .toList()
+          : null,
       metadata: json['metadata'] != null
           ? Map<String, dynamic>.from(json['metadata'] as Map)
           : null,

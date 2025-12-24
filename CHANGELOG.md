@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.4.2 - 2025-12-24
+
+### Added
+- **Structured Stack Traces**: Stack traces are now parsed into structured frames using the `stack_trace` package.
+  - New `stackTraceElements` field in log events contains parsed frames with `file`, `line`, `column`, `method`, and `class`
+  - Dashboard displays clean, readable stack frames instead of raw text
+  - Backwards compatible: raw `stackTrace` string still included for older dashboards
+- **Improved Crash Debugging**: Cleaner stack traces with internal Dart frames filtered out via `.terse`
+
 ## 1.4.1 - 2025-12-21
 
 ### Added

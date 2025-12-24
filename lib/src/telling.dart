@@ -13,6 +13,7 @@ import 'device_info_collector.dart';
 import 'rate_limiter.dart';
 import 'screen_tracker.dart';
 import 'go_router_screen_tracker.dart';
+import 'utils/stack_trace_parser.dart';
 // import 'performance_tracker.dart';
 
 class Telling {
@@ -780,14 +781,36 @@ class Telling {
         'breadcrumbs': List<Map<String, dynamic>>.from(_breadcrumbs),
     };
 
+    // Parse stack trace into structured elements
+    final rawStackTrace =
+        stackTrace?.toString() ??
+        (error is Error ? error.stackTrace?.toString() : null);
+
+    List<Map<String, String>>? parsedElements;
+    if (rawStackTrace != null && rawStackTrace.isNotEmpty) {
+      try {
+        final frames = parseStackTrace(
+          stackTrace ??
+              (error is Error ? error.stackTrace! : StackTrace.current),
+        );
+        if (frames.isNotEmpty) {
+          parsedElements = stackFramesToJson(frames);
+        }
+      } catch (e) {
+        // Parsing failed, continue without structured elements
+        if (_enableDebugLogs) {
+          print('Telling: Failed to parse stack trace: $e');
+        }
+      }
+    }
+
     final event = LogEvent(
       type: type,
       level: level,
       message: message,
       timestamp: DateTime.now().toUtc(),
-      stackTrace:
-          stackTrace?.toString() ??
-          (error is Error ? error.stackTrace?.toString() : null),
+      stackTrace: rawStackTrace,
+      stackTraceElements: parsedElements,
       metadata: enrichedMetadata.isNotEmpty ? enrichedMetadata : null,
       deviceMetadata: _deviceMetadata,
       userId: _userId,

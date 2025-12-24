@@ -1,6 +1,6 @@
 name: telling_logger
 description: Comprehensive crash reporting, error tracking, and analytics SDK for Flutter applications. Track errors, monitor performance, and gain insights into your app's behavior.
-version: 1.4.1
+version: 1.4.2
 homepage: https://github.com/ThatSaxyDev/telling-logger
 repository: https://github.com/ThatSaxyDev/telling-logger
 issue_tracker: https://github.com/ThatSaxyDev/telling-logger/issues
@@ -16,6 +16,7 @@ dependencies:
   http: ^1.6.0
   package_info_plus: ^9.0.0
   shared_preferences: ^2.5.3
+  stack_trace: ^1.12.0
   url_launcher: ^6.3.2
 
 dev_dependencies:
