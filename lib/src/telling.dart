@@ -774,10 +774,10 @@ class Telling {
       return;
     }
 
-    // Build metadata with breadcrumbs for crash logs
+    // Build metadata with breadcrumbs for all logs (activity trail context)
     final enrichedMetadata = <String, dynamic>{
       ...?metadata,
-      if (type == LogType.crash && _breadcrumbs.isNotEmpty)
+      if (_breadcrumbs.isNotEmpty)
         'breadcrumbs': List<Map<String, dynamic>>.from(_breadcrumbs),
     };
 

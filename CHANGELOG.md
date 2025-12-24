@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.4.3 - 2025-12-24
+
+### Changed
+- **Breadcrumbs on All Logs**: Activity trail (breadcrumbs) are now attached to ALL log types, not just crash logs
+  - Provides user activity context for general logs, analytics, errors, and performance logs
+  - Helps debug any issue by seeing what the user was doing leading up to the logged event
+
 ## 1.4.2 - 2025-12-24
 
 ### Added
