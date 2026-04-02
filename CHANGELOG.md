@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.4.4 - 2026-04-02
+
+### Changed
+- **Backend Endpoint Migration**: Updated the SDK's default ingestion and version-check endpoints to the new Render deployment.
+  - Log ingestion now targets `https://telling-server.onrender.com/api/v1/logs`
+  - Version checks now target `https://telling-server.onrender.com/api/v1/project/version-check`
+
 ## 1.4.3 - 2025-12-24
 
 ### Changed
