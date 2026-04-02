@@ -21,7 +21,7 @@ class Telling {
   static Telling get instance => _instance;
 
   String? _apiKey;
-  final String _baseUrl = 'https://tellingserver.globeapp.dev/api/v1/logs';
+  final String _baseUrl = 'https://telling-server.onrender.com/api/v1/logs';
   bool _initialized = false;
   DeviceMetadata? _deviceMetadata;
   static const String _storageKey = 'telling_logs_buffer';
@@ -154,7 +154,7 @@ class Telling {
 
       final uri =
           Uri.parse(
-            'https://tellingserver.globeapp.dev/api/v1/project/version-check',
+            'https://telling-server.onrender.com/api/v1/project/version-check',
           ).replace(
             queryParameters: {'platform': platform, 'version': currentVersion},
           );
