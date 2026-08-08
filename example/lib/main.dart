@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:telling_logger/telling_logger.dart';
 
+const _kApiKey = 'YOUR_API_KEY';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Telling SDK
-  // Replace 'YOUR_API_KEY' with a valid key from your dashboard
   await Telling.instance.init(
-    'API_KEY',
+    _kApiKey,
     enableDebugLogs: true,
   );
 

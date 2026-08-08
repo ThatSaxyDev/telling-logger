@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.4.5 - 2026-08-08
+
+### Changed
+- **Updated Server Endpoint**: SDK now targets `https://telling-api.kiishi.space/api/v1` (migrated from Render to self-hosted Dokploy).
+- **SDK Constraint**: Raised Dart SDK minimum from `^3.9.2` to `^3.12.2`.
+
 ## 1.4.4 - 2026-04-02
 
 ### Changed

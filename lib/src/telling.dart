@@ -21,7 +21,7 @@ class Telling {
   static Telling get instance => _instance;
 
   String? _apiKey;
-  final String _baseUrl = 'https://telling-server.onrender.com/api/v1/logs';
+  static const String _serverUrl = 'https://telling-api.kiishi.space/api/v1';
   bool _initialized = false;
   DeviceMetadata? _deviceMetadata;
   static const String _storageKey = 'telling_logs_buffer';
@@ -154,7 +154,7 @@ class Telling {
 
       final uri =
           Uri.parse(
-            'https://telling-server.onrender.com/api/v1/project/version-check',
+            '$_serverUrl/project/version-check',
           ).replace(
             queryParameters: {'platform': platform, 'version': currentVersion},
           );
@@ -909,7 +909,7 @@ class Telling {
     try {
       // Batch sending
       // if (kDebugMode) {
-      //   print('Telling: Sending ${eventsToSend.length} logs to $_baseUrl');
+      //   print('Telling: Sending ${eventsToSend.length} logs to $_serverUrl/logs');
       // }
 
       final jsonPayload = jsonEncode(
@@ -938,7 +938,7 @@ class Telling {
       }
 
       final response = await http.post(
-        Uri.parse(_baseUrl),
+        Uri.parse('$_serverUrl/logs'),
         headers: headers,
         body: body,
       );
