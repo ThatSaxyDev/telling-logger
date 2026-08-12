@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.4.8 - 2026-08-12
+
+### Changed
+
+- **Dependency Rollback**: Reverted `device_info_plus` to `^11.5.0` and `package_info_plus` to `^9.0.1` for broader Flutter SDK compatibility.
+
 ## 1.4.7 - 2026-08-12
 
 ### Changed
