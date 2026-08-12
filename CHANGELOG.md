@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.4.7 - 2026-08-12
+
+### Changed
+
+- **Dependency Updates**: Bumped `device_info_plus` from `^11.5.0` to `^13.2.0` and `package_info_plus` from `^9.0.0` to `^10.2.1`.
+
 ## 1.4.6 - 2026-08-08
 
 ### Changed
